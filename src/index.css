@@ -211,6 +211,20 @@
   color: rgb(var(--color-white));
 }
 
+.quake-popup-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+  border: 1px solid rgba(var(--color-signal-orange), 0.32);
+  border-radius: 8px;
+  background: rgba(var(--color-signal-orange), 0.12);
+  color: rgb(var(--color-signal-orange));
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 .quake-popup-actions {
   display: flex;
   flex-wrap: wrap;

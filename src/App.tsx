@@ -22,6 +22,7 @@ import { FilterBar } from './components/FilterBar';
 import { MagnitudeDistribution } from './components/MagnitudeDistribution';
 import { MajorQuakeHighlight } from './components/MajorQuakeHighlight';
 import { StatCard } from './components/StatCard';
+import { TsunamiStatus } from './components/TsunamiStatus';
 import type { Earthquake, FeedId, SortKey, SortState, UsgsFeatureCollection } from './types';
 import { COPY, type Language } from './i18n';
 import {
@@ -304,6 +305,14 @@ function App() {
           quake={majorQuake}
           feedLabel={selectedFeedLabel}
           magnitudeThreshold={majorMagnitudeThreshold}
+          copy={copy}
+          isLoading={isLoading && feedState.quakes.length === 0}
+          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
+        />
+
+        <TsunamiStatus
+          quakes={feedState.quakes}
+          feedLabel={selectedFeedLabel}
           copy={copy}
           isLoading={isLoading && feedState.quakes.length === 0}
           onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}

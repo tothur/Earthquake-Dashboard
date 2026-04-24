@@ -113,6 +113,18 @@ export interface DashboardCopy {
       major: string;
     };
   };
+  tsunami: {
+    title: string;
+    clearTitle: string;
+    flaggedTitle: (count: string) => string;
+    clearBody: (feedLabel: string) => string;
+    flaggedBody: (feedLabel: string) => string;
+    disclaimer: string;
+    strongest: string;
+    latest: string;
+    reviewEvents: string;
+    viewDetails: string;
+  };
   table: {
     title: string;
     subtitle: string;
@@ -147,6 +159,9 @@ export interface DashboardCopy {
     status: string;
     alert: string;
     tsunamiFlag: string;
+    tsunamiFlagActive: string;
+    tsunamiFlagInactive: string;
+    tsunamiFlagNote: string;
     feltReports: string;
     significance: string;
     usgsEvent: string;
@@ -289,6 +304,21 @@ export const COPY: Record<Language, DashboardCopy> = {
         major: 'M7.0+',
       },
     },
+    tsunami: {
+      title: 'Tsunami information',
+      clearTitle: 'No USGS tsunami flag in this feed',
+      flaggedTitle: (count: string) => `${count} event(s) with a USGS tsunami flag`,
+      clearBody: (feedLabel: string) =>
+        `The selected ${feedLabel.toLocaleLowerCase()} feed does not currently include an earthquake marked with the USGS tsunami flag.`,
+      flaggedBody: (feedLabel: string) =>
+        `The selected ${feedLabel.toLocaleLowerCase()} feed includes event(s) marked with the USGS tsunami flag.`,
+      disclaimer:
+        'This dashboard surfaces the USGS event flag only. Always follow official tsunami advisories from civil protection and tsunami warning centers.',
+      strongest: 'Strongest flagged event',
+      latest: 'Latest flagged event',
+      reviewEvents: 'Review flagged events',
+      viewDetails: 'View details',
+    },
     table: {
       title: 'Recent Earthquakes',
       subtitle: 'Sorted list of events currently shown on the map.',
@@ -330,6 +360,10 @@ export const COPY: Record<Language, DashboardCopy> = {
       status: 'Status',
       alert: 'Alert',
       tsunamiFlag: 'Tsunami flag',
+      tsunamiFlagActive: 'USGS tsunami flag active',
+      tsunamiFlagInactive: 'No USGS tsunami flag',
+      tsunamiFlagNote:
+        'This is the tsunami flag included in the USGS earthquake feed, not a replacement for official tsunami advisories.',
       feltReports: 'Felt reports',
       significance: 'Significance',
       usgsEvent: 'USGS event',
@@ -476,6 +510,21 @@ export const COPY: Record<Language, DashboardCopy> = {
         major: 'M7,0+',
       },
     },
+    tsunami: {
+      title: 'Cunamival kapcsolatos információ',
+      clearTitle: 'Nincs USGS cunamijelzés ebben az adatfolyamban',
+      flaggedTitle: (count: string) => `${count} esemény USGS cunamijelzéssel`,
+      clearBody: (feedLabel: string) =>
+        `A kiválasztott, ${feedLabel.toLocaleLowerCase()} időszakra vonatkozó adatfolyam jelenleg nem tartalmaz USGS cunamijelzéssel megjelölt földrengést.`,
+      flaggedBody: (feedLabel: string) =>
+        `A kiválasztott, ${feedLabel.toLocaleLowerCase()} időszakra vonatkozó adatfolyam USGS cunamijelzéssel megjelölt eseményt is tartalmaz.`,
+      disclaimer:
+        'A dashboard csak az USGS eseményjelzőjét jeleníti meg. Mindig a hivatalos katasztrófavédelmi és cunamijelző központok tájékoztatását kövesd.',
+      strongest: 'Legerősebb jelölt esemény',
+      latest: 'Legfrissebb jelölt esemény',
+      reviewEvents: 'Jelölt események áttekintése',
+      viewDetails: 'Részletek',
+    },
     table: {
       title: 'Legutóbbi földrengések',
       subtitle: 'A térképen megjelenő események rendezhető listája.',
@@ -517,6 +566,10 @@ export const COPY: Record<Language, DashboardCopy> = {
       status: 'Állapot',
       alert: 'Riasztás',
       tsunamiFlag: 'Cunamijelzés',
+      tsunamiFlagActive: 'Aktív USGS cunamijelzés',
+      tsunamiFlagInactive: 'Nincs USGS cunamijelzés',
+      tsunamiFlagNote:
+        'Ez az USGS földrengés-adatfolyamában szereplő cunamijelző, nem helyettesíti a hivatalos cunamitájékoztatást.',
       feltReports: 'Észlelések',
       significance: 'Jelentőség',
       usgsEvent: 'USGS esemény',

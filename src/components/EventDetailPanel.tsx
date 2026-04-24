@@ -105,9 +105,23 @@ export function EventDetailPanel({ quake, copy, onClose }: EventDetailPanelProps
             <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-3">
               <Waves size={17} className="text-signal-orange" aria-hidden="true" />
               <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.detail.tsunamiFlag}</p>
-              <p className="mt-1 text-lg font-semibold text-white">{quake.tsunami ? copy.detail.yes : copy.detail.no}</p>
+              <p className="mt-1 text-lg font-semibold text-white">
+                {quake.tsunami ? copy.detail.tsunamiFlagActive : copy.detail.tsunamiFlagInactive}
+              </p>
             </article>
           </section>
+
+          {quake.tsunami && (
+            <section className="mt-5 rounded-[8px] border border-signal-orange/30 bg-signal-orange/10 p-4">
+              <div className="flex gap-3">
+                <Waves size={18} className="mt-0.5 shrink-0 text-signal-orange" aria-hidden="true" />
+                <div>
+                  <h3 className="text-sm font-semibold text-white">{copy.detail.tsunamiFlagActive}</h3>
+                  <p className="mt-1 text-sm leading-6 text-slate-300">{copy.detail.tsunamiFlagNote}</p>
+                </div>
+              </div>
+            </section>
+          )}
 
           <section className="mt-5 rounded-[8px] border border-white/10 bg-white/[0.035] p-4">
             <h3 className="text-sm font-semibold text-white">{copy.detail.metadata}</h3>

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CircleMarker, GeoJSON, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { ExternalLink, Layers, MapPinned } from 'lucide-react';
+import { ExternalLink, Layers, MapPinned, Waves } from 'lucide-react';
 import type { Feature, GeoJsonObject } from 'geojson';
 import type { Earthquake } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude, formatNumber, formatRelativeTime } from '../utils/format';
@@ -198,6 +198,12 @@ function QuakePopup({
           <dd>{formatDateTime(quake.time, copy.locale)}</dd>
         </div>
       </dl>
+      {quake.tsunami && (
+        <div className="quake-popup-warning">
+          <Waves size={14} aria-hidden="true" />
+          {copy.detail.tsunamiFlagActive}
+        </div>
+      )}
       <div className="quake-popup-actions">
         <button type="button" onClick={() => onQuakeSelect(quake)}>
           {copy.detail.viewDetails}
