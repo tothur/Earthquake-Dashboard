@@ -249,9 +249,9 @@ function App() {
             <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">{copy.title}</h1>
           </div>
 
-          <div className="flex w-fit flex-col gap-2 sm:items-end">
-            <div className="inline-flex w-fit items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel">
-              <span className="flex items-center gap-2 px-2 font-medium text-slate-400">
+          <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-fit lg:flex-col lg:items-end">
+            <div className="flex min-w-0 items-center justify-between gap-2 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel sm:justify-start lg:w-fit">
+              <span className="flex min-w-0 items-center gap-2 whitespace-nowrap px-2 font-medium text-slate-400">
                 <Languages size={16} aria-hidden="true" />
                 {copy.language}
               </span>
@@ -276,8 +276,8 @@ function App() {
               })}
             </div>
 
-            <div className="inline-flex w-fit items-center gap-1 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel">
-              <span className="flex items-center gap-2 px-2 font-medium text-slate-400">
+            <div className="flex min-w-0 items-center justify-between gap-1 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel sm:justify-start lg:w-fit">
+              <span className="flex min-w-0 items-center gap-2 whitespace-nowrap px-2 font-medium text-slate-400">
                 <Monitor size={16} aria-hidden="true" />
                 {copy.theme.label}
               </span>
