@@ -5,9 +5,11 @@ import { ExternalLink, MapPinned } from 'lucide-react';
 import type { Earthquake } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude } from '../utils/format';
 import { magnitudeTone, markerRadius } from '../utils/earthquakes';
+import type { DashboardCopy } from '../i18n';
 
 interface EarthquakeMapProps {
   quakes: Earthquake[];
+  copy: DashboardCopy;
   isLoading: boolean;
 }
 
@@ -31,13 +33,13 @@ function FitBounds({ quakes }: { quakes: Earthquake[] }) {
   return null;
 }
 
-export function EarthquakeMap({ quakes, isLoading }: EarthquakeMapProps) {
+export function EarthquakeMap({ quakes, copy, isLoading }: EarthquakeMapProps) {
   return (
     <section className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className="flex flex-col gap-2 border-b border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-white">Global Seismic Map</h2>
-          <p className="text-sm text-slate-400">Marker color and size scale with reported magnitude.</p>
+          <h2 className="text-lg font-semibold text-white">{copy.map.title}</h2>
+          <p className="text-sm text-slate-400">{copy.map.subtitle}</p>
         </div>
         <div className="flex flex-wrap gap-2 text-xs text-slate-300">
           {[
@@ -87,20 +89,22 @@ export function EarthquakeMap({ quakes, isLoading }: EarthquakeMapProps) {
               >
                 <Popup>
                   <div className="quake-popup-content">
-                    <div className="quake-popup-kicker">{formatMagnitude(quake.magnitude)}</div>
+                    <div className="quake-popup-kicker">
+                      {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
+                    </div>
                     <h3>{quake.place}</h3>
                     <dl>
                       <div>
-                        <dt>Depth</dt>
-                        <dd>{formatDepth(quake.depthKm)}</dd>
+                        <dt>{copy.map.depth}</dt>
+                        <dd>{formatDepth(quake.depthKm, copy.locale)}</dd>
                       </div>
                       <div>
-                        <dt>Time</dt>
-                        <dd>{formatDateTime(quake.time)}</dd>
+                        <dt>{copy.map.time}</dt>
+                        <dd>{formatDateTime(quake.time, copy.locale)}</dd>
                       </div>
                     </dl>
                     <a href={quake.url} target="_blank" rel="noreferrer">
-                      USGS event <ExternalLink size={13} aria-hidden="true" />
+                      {copy.major.usgsEvent} <ExternalLink size={13} aria-hidden="true" />
                     </a>
                   </div>
                 </Popup>
@@ -113,14 +117,14 @@ export function EarthquakeMap({ quakes, isLoading }: EarthquakeMapProps) {
           <div className="absolute inset-0 z-[500] grid place-items-center bg-ink-950/50 backdrop-blur-sm">
             <div className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-ink-900/90 px-4 py-3 text-sm font-semibold text-white">
               <MapPinned size={17} className="animate-pulse text-signal-green" aria-hidden="true" />
-              Loading USGS feed
+              {copy.map.loading}
             </div>
           </div>
         )}
 
         {!isLoading && quakes.length === 0 && (
           <div className="pointer-events-none absolute inset-x-4 top-4 z-[500] rounded-[8px] border border-white/10 bg-ink-900/90 px-4 py-3 text-sm text-slate-300">
-            No earthquakes match the active filters.
+            {copy.map.empty}
           </div>
         )}
       </div>

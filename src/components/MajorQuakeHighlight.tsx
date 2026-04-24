@@ -2,16 +2,20 @@ import { AlertTriangle, ExternalLink, RadioTower, Waves } from 'lucide-react';
 import type { Earthquake } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude, formatRelativeTime } from '../utils/format';
 import { magnitudeTone } from '../utils/earthquakes';
+import type { DashboardCopy } from '../i18n';
+
+type MagnitudeToneKey = keyof DashboardCopy['magnitudeTone'];
 
 interface MajorQuakeHighlightProps {
   quake: Earthquake | null;
   feedLabel: string;
   magnitudeThreshold: number;
+  copy: DashboardCopy;
   isLoading: boolean;
 }
 
-export function MajorQuakeHighlight({ quake, feedLabel, magnitudeThreshold, isLoading }: MajorQuakeHighlightProps) {
-  const thresholdLabel = `M ${magnitudeThreshold.toFixed(1)}+`;
+export function MajorQuakeHighlight({ quake, feedLabel, magnitudeThreshold, copy, isLoading }: MajorQuakeHighlightProps) {
+  const thresholdLabel = formatMagnitude(magnitudeThreshold, copy.locale, copy.pendingMagnitude) + '+';
 
   if (isLoading) {
     return (
@@ -36,18 +40,14 @@ export function MajorQuakeHighlight({ quake, feedLabel, magnitudeThreshold, isLo
           <div>
             <div className="inline-flex items-center gap-2 rounded-[8px] border border-signal-green/25 bg-signal-green/10 px-3 py-1 text-sm font-semibold text-signal-green">
               <RadioTower size={16} aria-hidden="true" />
-              Major earthquake watch
+              {copy.major.watch}
             </div>
             <h2 className="mt-4 text-xl font-semibold text-white">
-              No {thresholdLabel} earthquake is currently listed.
+              {copy.major.noEvent(thresholdLabel)}
             </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-              The selected USGS feed for {feedLabel.toLocaleLowerCase()} does not currently include an earthquake at
-              or above the active monitoring threshold.
+              {copy.major.emptyBody(feedLabel)}
             </p>
-          </div>
-          <div className="rounded-[8px] border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300">
-            Monitoring threshold: <span className="font-semibold text-white">{thresholdLabel}</span>
           </div>
         </div>
       </section>
@@ -55,51 +55,54 @@ export function MajorQuakeHighlight({ quake, feedLabel, magnitudeThreshold, isLo
   }
 
   const tone = magnitudeTone(quake.magnitude);
+  const toneLabel = copy.magnitudeTone[tone.label as MagnitudeToneKey];
 
   return (
     <section className="rounded-[8px] border border-signal-amber/25 bg-[linear-gradient(135deg,rgba(246,182,95,0.16),rgba(184,108,255,0.10),rgba(255,255,255,0.045))] p-5 shadow-glow">
       <div className="flex items-center gap-2 text-sm font-semibold text-signal-amber">
         <AlertTriangle size={17} aria-hidden="true" />
-        Largest {thresholdLabel} event in {feedLabel.toLocaleLowerCase()}
+        {copy.major.largest(thresholdLabel, feedLabel)}
       </div>
 
       <div className="mt-5 grid gap-5 md:grid-cols-[170px_minmax(0,1fr)] md:items-center">
         <div className="rounded-[8px] border border-white/10 bg-ink-950/70 p-4 text-center">
-          <p className="text-sm font-medium text-slate-400">{tone.label}</p>
-          <p className="mt-2 text-5xl font-semibold text-white">{formatMagnitude(quake.magnitude)}</p>
-          <p className="mt-2 text-sm text-slate-400">{quake.magnitudeType ?? 'USGS magnitude'}</p>
+          <p className="text-sm font-medium text-slate-400">{toneLabel}</p>
+          <p className="mt-2 text-5xl font-semibold text-white">
+            {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
+          </p>
+          <p className="mt-2 text-sm text-slate-400">{quake.magnitudeType ?? copy.major.magnitudeSource}</p>
         </div>
 
         <div>
           <h2 className="text-2xl font-semibold leading-tight text-white md:text-3xl">{quake.place}</h2>
           <div className="mt-4 flex flex-wrap gap-2">
             <span className="rounded-[8px] border border-white/10 bg-ink-900/70 px-3 py-1 text-sm text-slate-300">
-              Depth <span className="font-semibold text-white">{formatDepth(quake.depthKm)}</span>
+              {copy.major.depth} <span className="font-semibold text-white">{formatDepth(quake.depthKm, copy.locale)}</span>
             </span>
             <span className="rounded-[8px] border border-white/10 bg-ink-900/70 px-3 py-1 text-sm text-slate-300">
-              {formatRelativeTime(quake.time)}
+              {formatRelativeTime(quake.time, copy.locale)}
             </span>
             {quake.tsunami && (
               <span className="inline-flex items-center gap-1 rounded-[8px] border border-signal-orange/30 bg-signal-orange/15 px-3 py-1 text-sm font-semibold text-signal-orange">
                 <Waves size={15} aria-hidden="true" />
-                Tsunami flag
+                {copy.major.tsunamiFlag}
               </span>
             )}
             {quake.alert && (
               <span className="rounded-[8px] border border-signal-red/30 bg-signal-red/15 px-3 py-1 text-sm font-semibold text-signal-red">
-                Alert {quake.alert}
+                {copy.major.alert} {quake.alert}
               </span>
             )}
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <p className="text-sm text-slate-400">Origin time: {formatDateTime(quake.time)}</p>
+            <p className="text-sm text-slate-400">{copy.major.originTime}: {formatDateTime(quake.time, copy.locale)}</p>
             <a
               href={quake.url}
               target="_blank"
               rel="noreferrer"
               className="inline-flex w-fit items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.08] px-3 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.13]"
             >
-              USGS event
+              {copy.major.usgsEvent}
               <ExternalLink size={15} aria-hidden="true" />
             </a>
           </div>

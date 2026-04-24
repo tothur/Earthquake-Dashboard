@@ -1,33 +1,35 @@
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 import clsx from 'clsx';
 import type { Earthquake, SortKey, SortState } from '../types';
-import { formatDateTime, formatDepth, formatMagnitude, formatRelativeTime } from '../utils/format';
+import { formatDateTime, formatDepth, formatMagnitude, formatNumber, formatRelativeTime } from '../utils/format';
 import { magnitudeTone } from '../utils/earthquakes';
+import type { DashboardCopy } from '../i18n';
 
 interface EarthquakeTableProps {
   quakes: Earthquake[];
   sortState: SortState;
+  copy: DashboardCopy;
   isLoading: boolean;
   isOpen: boolean;
   onToggle: () => void;
   onSortChange: (key: SortKey) => void;
 }
 
-const columns: Array<{ key: SortKey; label: string; align?: 'right' | 'left' }> = [
-  { key: 'time', label: 'Time' },
-  { key: 'magnitude', label: 'Magnitude', align: 'right' },
-  { key: 'depthKm', label: 'Depth', align: 'right' },
-  { key: 'place', label: 'Location' },
-];
+export function EarthquakeTable({ quakes, sortState, copy, isLoading, isOpen, onToggle, onSortChange }: EarthquakeTableProps) {
+  const columns: Array<{ key: SortKey; label: string; align?: 'right' | 'left' }> = [
+    { key: 'time', label: copy.table.columns.time },
+    { key: 'magnitude', label: copy.table.columns.magnitude, align: 'right' },
+    { key: 'depthKm', label: copy.table.columns.depthKm, align: 'right' },
+    { key: 'place', label: copy.table.columns.place },
+  ];
 
-export function EarthquakeTable({ quakes, sortState, isLoading, isOpen, onToggle, onSortChange }: EarthquakeTableProps) {
   return (
     <section className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className={clsx('px-4 py-3', isOpen && 'border-b border-white/10')}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-lg font-semibold text-white">Recent Earthquakes</h2>
-            <p className="text-sm text-slate-400">Sorted list of events currently shown on the map.</p>
+            <h2 className="text-lg font-semibold text-white">{copy.table.title}</h2>
+            <p className="text-sm text-slate-400">{copy.table.subtitle}</p>
           </div>
           <button
             type="button"
@@ -37,13 +39,15 @@ export function EarthquakeTable({ quakes, sortState, isLoading, isOpen, onToggle
             className="inline-flex h-10 w-fit items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.06] px-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.1]"
           >
             {isOpen ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
-            {isOpen ? 'Hide list' : 'Show list'}
-            <span className="rounded bg-white/10 px-2 py-0.5 text-xs text-slate-300">{quakes.length}</span>
+            {isOpen ? copy.table.hide : copy.table.show}
+            <span className="rounded bg-white/10 px-2 py-0.5 text-xs text-slate-300">
+              {formatNumber(quakes.length, copy.locale)}
+            </span>
           </button>
         </div>
         {!isOpen && (
           <p className="mt-3 text-sm text-slate-400">
-            {quakes.length} events available. Expand the list to inspect, sort, and open individual USGS event records.
+            {copy.table.collapsed(formatNumber(quakes.length, copy.locale))}
           </p>
         )}
       </div>
@@ -89,7 +93,7 @@ export function EarthquakeTable({ quakes, sortState, isLoading, isOpen, onToggle
                     </th>
                   ))}
                   <th scope="col" className="px-4 py-3 text-right font-semibold">
-                    Link
+                    {copy.table.columns.link}
                   </th>
                 </tr>
               </thead>
@@ -119,24 +123,26 @@ export function EarthquakeTable({ quakes, sortState, isLoading, isOpen, onToggle
                       return (
                         <tr key={quake.id} className="transition hover:bg-white/[0.035]">
                           <td className="px-4 py-4 align-top">
-                            <div className="font-medium text-white">{formatRelativeTime(quake.time)}</div>
-                            <div className="mt-1 text-sm text-slate-400">{formatDateTime(quake.time)}</div>
+                            <div className="font-medium text-white">{formatRelativeTime(quake.time, copy.locale)}</div>
+                            <div className="mt-1 text-sm text-slate-400">{formatDateTime(quake.time, copy.locale)}</div>
                           </td>
                           <td className="px-4 py-4 text-right align-top">
                             <span
                               className="inline-flex min-w-16 justify-center rounded-[8px] px-2.5 py-1 text-sm font-semibold"
                               style={{ color: tone.color, backgroundColor: tone.background }}
                             >
-                              {formatMagnitude(quake.magnitude)}
+                              {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
                             </span>
                           </td>
-                          <td className="px-4 py-4 text-right align-top text-slate-200">{formatDepth(quake.depthKm)}</td>
+                          <td className="px-4 py-4 text-right align-top text-slate-200">{formatDepth(quake.depthKm, copy.locale)}</td>
                           <td className="px-4 py-4 align-top">
                             <div className="max-w-[390px] font-medium text-white">{quake.place}</div>
                             <div className="mt-1 flex flex-wrap gap-2 text-xs text-slate-400">
-                              <span>Status: {quake.status}</span>
-                              {quake.felt !== null && <span>Felt reports: {quake.felt}</span>}
-                              {quake.tsunami && <span className="font-semibold text-signal-orange">Tsunami flag</span>}
+                              <span>{copy.table.status}: {quake.status}</span>
+                              {quake.felt !== null && (
+                                <span>{copy.table.feltReports}: {formatNumber(quake.felt, copy.locale)}</span>
+                              )}
+                              {quake.tsunami && <span className="font-semibold text-signal-orange">{copy.table.tsunamiFlag}</span>}
                             </div>
                           </td>
                           <td className="px-4 py-4 text-right align-top">
@@ -145,7 +151,7 @@ export function EarthquakeTable({ quakes, sortState, isLoading, isOpen, onToggle
                               target="_blank"
                               rel="noreferrer"
                               className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.05] text-slate-200 transition hover:border-white/20 hover:bg-white/[0.1] hover:text-white"
-                              aria-label={`Open USGS event for ${quake.place}`}
+                              aria-label={copy.table.openEvent(quake.place)}
                             >
                               <ExternalLink size={16} aria-hidden="true" />
                             </a>
@@ -159,8 +165,8 @@ export function EarthquakeTable({ quakes, sortState, isLoading, isOpen, onToggle
 
           {!isLoading && quakes.length === 0 && (
             <div className="border-t border-white/10 px-4 py-10 text-center">
-              <p className="font-semibold text-white">No earthquakes match the current filters.</p>
-              <p className="mt-2 text-sm text-slate-400">Lower the minimum magnitude or choose a wider time range.</p>
+              <p className="font-semibold text-white">{copy.table.emptyTitle}</p>
+              <p className="mt-2 text-sm text-slate-400">{copy.table.emptyBody}</p>
             </div>
           )}
         </div>

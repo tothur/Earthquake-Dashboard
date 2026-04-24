@@ -4,6 +4,7 @@ import {
   AlertTriangle,
   Clock3,
   Globe2,
+  Languages,
   MapPinned,
   ShieldAlert,
   SignalHigh,
@@ -15,6 +16,7 @@ import { FilterBar } from './components/FilterBar';
 import { MajorQuakeHighlight } from './components/MajorQuakeHighlight';
 import { StatCard } from './components/StatCard';
 import type { Earthquake, FeedId, SortKey, SortState, UsgsFeatureCollection } from './types';
+import { COPY, type Language } from './i18n';
 import {
   applyMinimumMagnitude,
   countAtLeast,
@@ -41,6 +43,7 @@ interface FeedState {
 const initialFeedId: FeedId = 'day';
 
 function App() {
+  const [language, setLanguage] = useState<Language>('en');
   const [selectedFeedId, setSelectedFeedId] = useState<FeedId>(initialFeedId);
   const [minimumMagnitude, setMinimumMagnitude] = useState(0);
   const [majorMagnitudeThreshold, setMajorMagnitudeThreshold] = useState(7);
@@ -60,6 +63,8 @@ function App() {
     () => FEEDS.find((feed) => feed.id === selectedFeedId) ?? FEEDS[1],
     [selectedFeedId],
   );
+  const copy = COPY[language];
+  const selectedFeedLabel = copy.feeds[selectedFeed.id].label;
 
   useEffect(() => {
     const controller = new AbortController();
@@ -143,17 +148,42 @@ function App() {
   return (
     <div className="min-h-screen bg-ink-950 text-slate-100">
       <div className="mx-auto flex w-full max-w-[1480px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
-        <header>
+        <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.05] px-3 py-1 text-sm font-semibold text-signal-green">
               <Globe2 size={16} aria-hidden="true" />
-              USGS Earthquake Hazards Program
+              {copy.appBadge}
             </div>
-            <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">Earthquake Tracker</h1>
+            <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">{copy.title}</h1>
             <p className="mt-3 max-w-3xl text-base leading-7 text-slate-400">
-              Real-time global seismic monitoring using official USGS GeoJSON feeds, with magnitude-scaled map markers,
-              live summary metrics, and sortable event detail.
+              {copy.subtitle}
             </p>
+          </div>
+
+          <div className="inline-flex w-fit items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel">
+            <span className="flex items-center gap-2 px-2 font-medium text-slate-400">
+              <Languages size={16} aria-hidden="true" />
+              {copy.language}
+            </span>
+            {(['en', 'hu'] as Language[]).map((option) => {
+              const isSelected = option === language;
+              return (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setLanguage(option)}
+                  className={`h-8 rounded-[8px] px-3 text-sm font-semibold transition ${
+                    isSelected
+                      ? 'bg-signal-green/15 text-signal-green'
+                      : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
+                  }`}
+                  aria-pressed={isSelected}
+                  aria-label={COPY[option].languageName}
+                >
+                  {COPY[option].languageShort}
+                </button>
+              );
+            })}
           </div>
         </header>
 
@@ -161,6 +191,7 @@ function App() {
           selectedFeedId={selectedFeedId}
           minimumMagnitude={minimumMagnitude}
           majorMagnitudeThreshold={majorMagnitudeThreshold}
+          copy={copy}
           isLoading={isLoading}
           onFeedChange={setSelectedFeedId}
           onMinimumMagnitudeChange={setMinimumMagnitude}
@@ -178,9 +209,9 @@ function App() {
               <div className="flex gap-3">
                 <AlertTriangle size={19} className="mt-0.5 shrink-0 text-signal-red" aria-hidden="true" />
                 <div>
-                  <p className="font-semibold text-white">USGS feed unavailable</p>
+                  <p className="font-semibold text-white">{copy.error.title}</p>
                   <p className="mt-1 text-slate-300">
-                    {feedState.error} The dashboard remains available; retry the feed or switch time ranges.
+                    {feedState.error || copy.error.fallback} {copy.error.body}
                   </p>
                 </div>
               </div>
@@ -189,7 +220,7 @@ function App() {
                 onClick={() => setRefreshToken((token) => token + 1)}
                 className="inline-flex h-9 w-fit items-center rounded-[8px] border border-white/10 bg-white/[0.08] px-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.13]"
               >
-                Retry
+                {copy.error.retry}
               </button>
             </div>
           </section>
@@ -197,58 +228,60 @@ function App() {
 
         <MajorQuakeHighlight
           quake={majorQuake}
-          feedLabel={selectedFeed.label}
+          feedLabel={selectedFeedLabel}
           magnitudeThreshold={majorMagnitudeThreshold}
+          copy={copy}
           isLoading={isLoading && feedState.quakes.length === 0}
         />
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard
             icon={Activity}
-            label="Displayed earthquakes"
-            value={formatNumber(filteredQuakes.length)}
-            detail={`${selectedFeed.label}${minimumMagnitude > 0 ? `, M ${minimumMagnitude}+` : ', all magnitudes'}`}
+            label={copy.stats.displayed}
+            value={formatNumber(filteredQuakes.length, copy.locale)}
+            detail={copy.stats.displayedDetail(selectedFeedLabel, minimumMagnitude)}
             tone="green"
           />
           <StatCard
             icon={SignalHigh}
-            label="Strongest earthquake"
-            value={strongest ? formatMagnitude(strongest.magnitude) : 'None'}
-            detail={strongest ? strongest.place : 'No event in the current filter'}
+            label={copy.stats.strongest}
+            value={strongest ? formatMagnitude(strongest.magnitude, copy.locale, copy.pendingMagnitude) : copy.notAvailable}
+            detail={strongest ? strongest.place : copy.stats.strongestEmpty}
             tone="amber"
           />
           <StatCard
             icon={Clock3}
-            label="Most recent"
-            value={mostRecent ? formatRelativeTime(mostRecent.time) : 'None'}
-            detail={mostRecent ? mostRecent.place : 'No recent event in the current filter'}
+            label={copy.stats.mostRecent}
+            value={mostRecent ? formatRelativeTime(mostRecent.time, copy.locale) : copy.notAvailable}
+            detail={mostRecent ? mostRecent.place : copy.stats.mostRecentEmpty}
             tone="violet"
           />
           <StatCard
             icon={MapPinned}
-            label="Closest to Hungary"
-            value={closestToHungary ? `${formatNumber(Math.round(closestToHungary.distanceKm))} km` : 'None'}
+            label={copy.stats.closestToHungary}
+            value={closestToHungary ? `${formatNumber(Math.round(closestToHungary.distanceKm), copy.locale)} km` : copy.notAvailable}
             detail={
               closestToHungary
-                ? `${formatMagnitude(closestToHungary.quake.magnitude)} ${closestToHungary.quake.place}`
-                : 'No event in the current filter'
+                ? `${formatMagnitude(closestToHungary.quake.magnitude, copy.locale, copy.pendingMagnitude)} ${closestToHungary.quake.place}`
+                : copy.stats.closestEmpty
             }
             tone="orange"
           />
           <StatCard
             icon={ShieldAlert}
-            label="Magnitude 6+"
-            value={formatNumber(countAtLeast(filteredQuakes, 6))}
-            detail="Events meeting or exceeding M 6.0"
+            label={copy.stats.magnitude6}
+            value={formatNumber(countAtLeast(filteredQuakes, 6), copy.locale)}
+            detail={copy.stats.magnitude6Detail}
             tone="red"
           />
         </section>
 
-        <EarthquakeMap quakes={filteredQuakes} isLoading={isLoading && feedState.quakes.length === 0} />
+        <EarthquakeMap quakes={filteredQuakes} copy={copy} isLoading={isLoading && feedState.quakes.length === 0} />
 
         <EarthquakeTable
           quakes={sortedQuakes}
           sortState={sortState}
+          copy={copy}
           isLoading={isLoading && feedState.quakes.length === 0}
           isOpen={isRecentListOpen}
           onToggle={() => setIsRecentListOpen((isOpen) => !isOpen)}
@@ -256,13 +289,13 @@ function App() {
         />
 
         <footer className="flex flex-col gap-1 pb-3 text-center text-xs text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-2">
-          <span>Feed status:</span>
-          <span>{feedState.sourceTitle || selectedFeed.description}</span>
+          <span>{copy.footer.feedStatus}</span>
+          <span>{selectedFeedLabel}</span>
           <span className="hidden sm:inline">·</span>
-          <span>{feedState.generatedAt ? `Generated ${formatDateTime(feedState.generatedAt)}` : 'Awaiting USGS data'}</span>
+          <span>{feedState.generatedAt ? `${copy.footer.generated} ${formatDateTime(feedState.generatedAt, copy.locale)}` : copy.footer.awaiting}</span>
           <span className="hidden sm:inline">·</span>
           <a href={selectedFeed.url} target="_blank" rel="noreferrer" className="text-signal-green transition hover:text-white">
-            Source GeoJSON
+            {copy.footer.source}
           </a>
         </footer>
       </div>
