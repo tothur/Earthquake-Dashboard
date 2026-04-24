@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CircleMarker, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import { CircleMarker, GeoJSON, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { ExternalLink, MapPinned } from 'lucide-react';
+import { ExternalLink, Layers, MapPinned } from 'lucide-react';
+import type { Feature, GeoJsonObject } from 'geojson';
 import type { Earthquake } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude, formatNumber, formatRelativeTime } from '../utils/format';
 import { getMostRecent, getStrongest, magnitudeTone, markerRadius } from '../utils/earthquakes';
@@ -31,6 +32,7 @@ const focusBounds: Record<Exclude<MapFocus, 'global'>, L.LatLngBoundsExpression>
 };
 
 const focusOptions: MapFocus[] = ['global', 'europe', 'hungary'];
+const tectonicBoundariesUrl = `${import.meta.env.BASE_URL}data/tectonic-boundaries.geojson`;
 
 interface QuakeCluster {
   id: string;
@@ -39,6 +41,10 @@ interface QuakeCluster {
   longitude: number;
   strongestMagnitude: number | null;
 }
+
+type TectonicFeatureProperties = {
+  Type?: string;
+};
 
 function FitBounds({ quakes, focus }: { quakes: Earthquake[]; focus: MapFocus }) {
   const map = useMap();
@@ -67,6 +73,61 @@ function FitBounds({ quakes, focus }: { quakes: Earthquake[]; focus: MapFocus })
   }, [focus, map, quakes]);
 
   return null;
+}
+
+function TectonicContextLayer({ theme }: { theme: 'light' | 'dark' }) {
+  const [data, setData] = useState<GeoJsonObject | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    async function loadTectonicBoundaries() {
+      try {
+        const response = await fetch(tectonicBoundariesUrl, { signal: controller.signal });
+        if (!response.ok) {
+          throw new Error(`Unable to load tectonic boundary data: ${response.status}`);
+        }
+
+        setData((await response.json()) as GeoJsonObject);
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          setData(null);
+        }
+      }
+    }
+
+    loadTectonicBoundaries();
+
+    return () => controller.abort();
+  }, []);
+
+  if (!data) {
+    return null;
+  }
+
+  const boundaryColor = theme === 'light' ? '#047857' : '#66e4b5';
+  const subductionColor = theme === 'light' ? '#b91c1c' : '#ff858e';
+
+  return (
+    <GeoJSON
+      key={theme}
+      data={data}
+      interactive={false}
+      style={(feature?: Feature) => {
+        const properties = (feature?.properties ?? {}) as TectonicFeatureProperties;
+        const isSubduction = properties.Type?.toLocaleLowerCase() === 'subduction';
+
+        return {
+          color: isSubduction ? subductionColor : boundaryColor,
+          dashArray: isSubduction ? undefined : '5 6',
+          lineCap: 'round',
+          lineJoin: 'round',
+          opacity: isSubduction ? 0.82 : 0.48,
+          weight: isSubduction ? 1.8 : 1.15,
+        };
+      }}
+    />
+  );
 }
 
 function getClusterCellSize(zoom: number): number {
@@ -288,6 +349,7 @@ export function EarthquakeMap({
   onQuakeSelect,
   isLoading,
 }: EarthquakeMapProps) {
+  const [showTectonicContext, setShowTectonicContext] = useState(true);
   const tileUrl =
     theme === 'light'
       ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
@@ -324,7 +386,41 @@ export function EarthquakeMap({
               );
             })}
           </div>
+          <div
+            className="inline-flex w-fit items-center gap-1 rounded-[8px] border border-white/10 bg-ink-900/80 p-1 text-xs shadow-panel"
+            aria-label={copy.map.contextLabel}
+          >
+            <span className="hidden items-center gap-1 px-2 font-semibold text-slate-400 sm:inline-flex">
+              <Layers size={14} aria-hidden="true" />
+              {copy.map.contextLabel}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowTectonicContext((isVisible) => !isVisible)}
+              className={`h-7 rounded-[7px] px-2.5 font-semibold transition ${
+                showTectonicContext
+                  ? 'bg-signal-green/15 text-signal-green'
+                  : 'text-slate-300 hover:bg-white/[0.08] hover:text-white'
+              }`}
+              aria-pressed={showTectonicContext}
+              title={copy.map.tectonicLayerDescription}
+            >
+              {copy.map.tectonicLayer}
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2 text-xs text-slate-300">
+            {showTectonicContext && (
+              <>
+                <span className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-ink-900/80 px-2 py-1">
+                  <span className="h-0 w-5 border-t border-dashed border-signal-green" />
+                  {copy.map.tectonicBoundary}
+                </span>
+                <span className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-ink-900/80 px-2 py-1">
+                  <span className="h-0 w-5 border-t-2 border-signal-red" />
+                  {copy.map.subductionZone}
+                </span>
+              </>
+            )}
             {[
               ['< M4', 'bg-signal-green'],
               ['M4+', 'bg-signal-amber'],
@@ -355,6 +451,7 @@ export function EarthquakeMap({
             attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
             url={tileUrl}
           />
+          {showTectonicContext && <TectonicContextLayer theme={theme} />}
           <FitBounds quakes={quakes} focus={focus} />
           <ClusteredQuakeLayer quakes={quakes} copy={copy} onQuakeSelect={onQuakeSelect} />
         </MapContainer>

@@ -4,13 +4,16 @@ A single-page, production-ready earthquake monitoring dashboard built with Vite,
 
 ## Features
 
-- Interactive global Leaflet map with magnitude-scaled markers.
-- USGS popup details for location, magnitude, depth, event time, and source link.
+- Interactive global Leaflet map with magnitude-scaled clustered markers.
+- Toggleable tectonic context overlay with PB2002 plate boundaries and subduction zones.
+- Event detail side panel with USGS metadata, coordinates, depth, status, and alert information.
 - Past hour, past day, and past week feed selector.
 - Minimum magnitude filter.
-- Magnitude 7+ highlight panel with graceful empty state.
-- Summary cards for total displayed earthquakes, strongest event, most recent event, M5+, and M6+ counts.
+- Configurable major-earthquake highlight panel with graceful empty state.
+- Summary cards for total displayed earthquakes, strongest event, most recent event, closest event to Hungary, and M6+ counts.
+- Earthquake timeline and magnitude distribution chart.
 - Sortable recent-earthquakes table.
+- English and Hungarian interface with light, dark, and automatic theme modes.
 - Loading, empty, and feed-error states.
 - Static-site deployment configuration for GitHub Pages.
 
@@ -21,6 +24,8 @@ The app uses official USGS GeoJSON feeds:
 - Past hour: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_hour.geojson`
 - Past day: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson`
 - Past week: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson`
+
+The tectonic context layer uses a bundled static copy of the PB2002 plate-boundary GeoJSON dataset from `fraxen/tectonicplates`, stored at `public/data/tectonic-boundaries.geojson` so the deployed app does not depend on GitHub raw content at runtime.
 
 ## Local Development
 
@@ -81,4 +86,4 @@ git push -u origin main
 
 - All API calls are client-side.
 - The dashboard handles temporary USGS feed errors without crashing.
-- The M7+ panel is based on the selected time range feed, independent of the minimum magnitude filter.
+- The major-earthquake panel is based on the selected time range feed, independent of the minimum magnitude filter.

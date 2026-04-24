@@ -73,6 +73,11 @@ export interface DashboardCopy {
       europe: string;
       hungary: string;
     };
+    contextLabel: string;
+    tectonicLayer: string;
+    tectonicLayerDescription: string;
+    tectonicBoundary: string;
+    subductionZone: string;
     cluster: (count: string) => string;
     clusterTitle: (count: string) => string;
     clusterStrongest: string;
@@ -91,6 +96,22 @@ export interface DashboardCopy {
     peak: string;
     strongest: string;
     interval: (start: string, end: string) => string;
+  };
+  distribution: {
+    title: string;
+    subtitle: string;
+    empty: string;
+    total: string;
+    strongestBin: string;
+    pending: string;
+    eventCount: (count: string) => string;
+    bins: {
+      minor: string;
+      light: string;
+      moderate: string;
+      strong: string;
+      major: string;
+    };
   };
   table: {
     title: string;
@@ -228,6 +249,11 @@ export const COPY: Record<Language, DashboardCopy> = {
         europe: 'Europe',
         hungary: 'Hungary',
       },
+      contextLabel: 'Map context layers',
+      tectonicLayer: 'Tectonic context',
+      tectonicLayerDescription: 'PB2002 plate boundaries and subduction zones.',
+      tectonicBoundary: 'Plate boundary',
+      subductionZone: 'Subduction zone',
       cluster: (count: string) => `${count} events`,
       clusterTitle: (count: string) => `${count} earthquakes in this cluster`,
       clusterStrongest: 'Strongest',
@@ -246,6 +272,22 @@ export const COPY: Record<Language, DashboardCopy> = {
       peak: 'Peak interval',
       strongest: 'Strongest event',
       interval: (start: string, end: string) => `${start} - ${end}`,
+    },
+    distribution: {
+      title: 'Magnitude Distribution',
+      subtitle: 'How reported magnitudes are distributed in the active filter.',
+      empty: 'No magnitude data for the active filters.',
+      total: 'Total with magnitude',
+      strongestBin: 'Most populated range',
+      pending: 'Pending',
+      eventCount: (count: string) => `${count} events`,
+      bins: {
+        minor: 'Below M4',
+        light: 'M4.0-4.9',
+        moderate: 'M5.0-5.9',
+        strong: 'M6.0-6.9',
+        major: 'M7.0+',
+      },
     },
     table: {
       title: 'Recent Earthquakes',
@@ -394,6 +436,11 @@ export const COPY: Record<Language, DashboardCopy> = {
         europe: 'Európa',
         hungary: 'Magyarország',
       },
+      contextLabel: 'Térképi kontextusrétegek',
+      tectonicLayer: 'Tektonikai kontextus',
+      tectonicLayerDescription: 'PB2002 lemezhatárok és szubdukciós zónák.',
+      tectonicBoundary: 'Lemezhatár',
+      subductionZone: 'Szubdukciós zóna',
       cluster: (count: string) => `${count} esemény`,
       clusterTitle: (count: string) => `${count} földrengés ebben a csoportban`,
       clusterStrongest: 'Legerősebb',
@@ -412,6 +459,22 @@ export const COPY: Record<Language, DashboardCopy> = {
       peak: 'Legaktívabb időszak',
       strongest: 'Legerősebb esemény',
       interval: (start: string, end: string) => `${start} - ${end}`,
+    },
+    distribution: {
+      title: 'Magnitúdóeloszlás',
+      subtitle: 'A jelentett magnitúdók megoszlása az aktuális szűrésben.',
+      empty: 'Nincs magnitúdóadat az aktuális szűrőkkel.',
+      total: 'Magnitúdóval rendelkező esemény',
+      strongestBin: 'Legnépesebb tartomány',
+      pending: 'Függőben',
+      eventCount: (count: string) => `${count} esemény`,
+      bins: {
+        minor: 'M4 alatt',
+        light: 'M4,0-4,9',
+        moderate: 'M5,0-5,9',
+        strong: 'M6,0-6,9',
+        major: 'M7,0+',
+      },
     },
     table: {
       title: 'Legutóbbi földrengések',

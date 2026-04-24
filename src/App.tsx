@@ -19,6 +19,7 @@ import { EarthquakeTable } from './components/EarthquakeTable';
 import { EarthquakeTimeline } from './components/EarthquakeTimeline';
 import { EventDetailPanel } from './components/EventDetailPanel';
 import { FilterBar } from './components/FilterBar';
+import { MagnitudeDistribution } from './components/MagnitudeDistribution';
 import { MajorQuakeHighlight } from './components/MajorQuakeHighlight';
 import { StatCard } from './components/StatCard';
 import type { Earthquake, FeedId, SortKey, SortState, UsgsFeatureCollection } from './types';
@@ -350,12 +351,19 @@ function App() {
           />
         </section>
 
-        <EarthquakeTimeline
-          quakes={filteredQuakes}
-          feedId={selectedFeedId}
-          copy={copy}
-          isLoading={isLoading && feedState.quakes.length === 0}
-        />
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(340px,0.65fr)]">
+          <EarthquakeTimeline
+            quakes={filteredQuakes}
+            feedId={selectedFeedId}
+            copy={copy}
+            isLoading={isLoading && feedState.quakes.length === 0}
+          />
+          <MagnitudeDistribution
+            quakes={filteredQuakes}
+            copy={copy}
+            isLoading={isLoading && feedState.quakes.length === 0}
+          />
+        </section>
 
         <EarthquakeMap
           quakes={filteredQuakes}
