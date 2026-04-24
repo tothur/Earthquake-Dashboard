@@ -6,6 +6,7 @@ A single-page, production-ready earthquake monitoring dashboard built with Vite,
 
 - Interactive global Leaflet map with magnitude-scaled clustered markers.
 - Toggleable tectonic context overlay with PB2002 plate boundaries and subduction zones.
+- NOAA/NWS active tsunami alert panel with optional map polygons when official alert geometry is available.
 - Event detail side panel with USGS metadata, coordinates, depth, status, and alert information.
 - Past hour, past day, and past week feed selector.
 - Minimum magnitude filter.
@@ -26,6 +27,13 @@ The app uses official USGS GeoJSON feeds:
 - Past week: `https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_week.geojson`
 
 The tectonic context layer uses a bundled static copy of the PB2002 plate-boundary GeoJSON dataset from `fraxen/tectonicplates`, stored at `public/data/tectonic-boundaries.geojson` so the deployed app does not depend on GitHub raw content at runtime.
+
+Tsunami information uses two levels of context:
+
+- The USGS earthquake `tsunami` event flag from the selected GeoJSON feed.
+- Active NOAA/NWS tsunami products from `https://api.weather.gov/alerts/active?event=Tsunami%20Warning,Tsunami%20Advisory,Tsunami%20Watch,Tsunami%20Information%20Statement&status=actual`.
+
+The dashboard links back to `https://www.tsunami.gov/` for official warning-center messages. It is a monitoring aid only and does not replace civil-protection instructions or official tsunami warning center guidance.
 
 ## Local Development
 
@@ -85,5 +93,5 @@ git push -u origin main
 ## Notes
 
 - All API calls are client-side.
-- The dashboard handles temporary USGS feed errors without crashing.
+- The dashboard handles temporary USGS and NOAA/NWS feed errors without crashing.
 - The major-earthquake panel is based on the selected time range feed, independent of the minimum magnitude filter.

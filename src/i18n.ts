@@ -76,6 +76,12 @@ export interface DashboardCopy {
     contextLabel: string;
     tectonicLayer: string;
     tectonicLayerDescription: string;
+    tsunamiAlertsLayer: string;
+    tsunamiAlertsDescription: string;
+    tsunamiAlertArea: string;
+    alertArea: string;
+    alertSeverity: string;
+    alertSource: string;
     tectonicBoundary: string;
     subductionZone: string;
     cluster: (count: string) => string;
@@ -117,12 +123,23 @@ export interface DashboardCopy {
     title: string;
     clearTitle: string;
     flaggedTitle: (count: string) => string;
+    officialAlertTitle: (count: string) => string;
     clearBody: (feedLabel: string) => string;
     flaggedBody: (feedLabel: string) => string;
+    officialAlertBody: string;
     disclaimer: string;
+    officialAlerts: string;
+    officialAlertList: string;
+    alertFeedLoading: string;
+    alertFeedUpdated: string;
+    alertFeedUnavailable: string;
+    alertFeedFallback: string;
+    warningCenter: string;
+    expires: string;
     strongest: string;
     latest: string;
     reviewEvents: string;
+    usgsFlagSummary: (count: string) => string;
     viewDetails: string;
   };
   table: {
@@ -174,6 +191,7 @@ export interface DashboardCopy {
     generated: string;
     awaiting: string;
     source: string;
+    tsunamiSource: string;
   };
   magnitudeTone: Record<'Major' | 'Strong' | 'Moderate+' | 'Light+' | 'Minor', string>;
 }
@@ -267,6 +285,12 @@ export const COPY: Record<Language, DashboardCopy> = {
       contextLabel: 'Map context layers',
       tectonicLayer: 'Tectonic context',
       tectonicLayerDescription: 'PB2002 plate boundaries and subduction zones.',
+      tsunamiAlertsLayer: 'Tsunami alerts',
+      tsunamiAlertsDescription: 'NOAA/NWS active tsunami alert polygons, when available.',
+      tsunamiAlertArea: 'Tsunami alert area',
+      alertArea: 'Area',
+      alertSeverity: 'Severity',
+      alertSource: 'Official alert',
       tectonicBoundary: 'Plate boundary',
       subductionZone: 'Subduction zone',
       cluster: (count: string) => `${count} events`,
@@ -306,17 +330,29 @@ export const COPY: Record<Language, DashboardCopy> = {
     },
     tsunami: {
       title: 'Tsunami information',
-      clearTitle: 'No USGS tsunami flag in this feed',
+      clearTitle: 'No active tsunami alert signal listed',
       flaggedTitle: (count: string) => `${count} event(s) with a USGS tsunami flag`,
+      officialAlertTitle: (count: string) => `${count} active official tsunami alert(s)`,
       clearBody: (feedLabel: string) =>
-        `The selected ${feedLabel.toLocaleLowerCase()} feed does not currently include an earthquake marked with the USGS tsunami flag.`,
+        `NOAA/NWS has no active tsunami alert product in this check, and the selected ${feedLabel.toLocaleLowerCase()} feed does not currently include an earthquake marked with the USGS tsunami flag.`,
       flaggedBody: (feedLabel: string) =>
         `The selected ${feedLabel.toLocaleLowerCase()} feed includes event(s) marked with the USGS tsunami flag.`,
+      officialAlertBody:
+        'NOAA/NWS currently lists active tsunami alert products. Review the official warning-center message for affected areas and instructions.',
       disclaimer:
-        'This dashboard surfaces the USGS event flag only. Always follow official tsunami advisories from civil protection and tsunami warning centers.',
+        'This dashboard combines USGS event flags with NOAA/NWS active alert products. Always follow civil protection instructions and official tsunami warning centers.',
+      officialAlerts: 'Official alerts',
+      officialAlertList: 'Active NOAA/NWS tsunami products',
+      alertFeedLoading: 'Checking NOAA/NWS active tsunami alerts...',
+      alertFeedUpdated: 'Alert feed checked',
+      alertFeedUnavailable: 'NOAA/NWS alert feed unavailable.',
+      alertFeedFallback: 'Unable to load active NOAA/NWS tsunami alerts.',
+      warningCenter: 'Tsunami.gov',
+      expires: 'Expires',
       strongest: 'Strongest flagged event',
       latest: 'Latest flagged event',
       reviewEvents: 'Review flagged events',
+      usgsFlagSummary: (count: string) => `${count} USGS flagged`,
       viewDetails: 'View details',
     },
     table: {
@@ -376,6 +412,7 @@ export const COPY: Record<Language, DashboardCopy> = {
       generated: 'Generated',
       awaiting: 'Awaiting USGS data',
       source: 'Source GeoJSON',
+      tsunamiSource: 'NOAA/NWS tsunami alerts',
     },
     magnitudeTone: {
       Major: 'Major',
@@ -473,6 +510,12 @@ export const COPY: Record<Language, DashboardCopy> = {
       contextLabel: 'Térképi kontextusrétegek',
       tectonicLayer: 'Tektonikai kontextus',
       tectonicLayerDescription: 'PB2002 lemezhatárok és szubdukciós zónák.',
+      tsunamiAlertsLayer: 'Cunamiriasztások',
+      tsunamiAlertsDescription: 'NOAA/NWS aktív cunamiriadó-poligonok, ha elérhetők.',
+      tsunamiAlertArea: 'Cunamiriadó területe',
+      alertArea: 'Terület',
+      alertSeverity: 'Súlyosság',
+      alertSource: 'Hivatalos riasztás',
       tectonicBoundary: 'Lemezhatár',
       subductionZone: 'Szubdukciós zóna',
       cluster: (count: string) => `${count} esemény`,
@@ -512,17 +555,29 @@ export const COPY: Record<Language, DashboardCopy> = {
     },
     tsunami: {
       title: 'Cunamival kapcsolatos információ',
-      clearTitle: 'Nincs USGS cunamijelzés ebben az adatfolyamban',
+      clearTitle: 'Nincs aktív cunamiriadó-jelzés',
       flaggedTitle: (count: string) => `${count} esemény USGS cunamijelzéssel`,
+      officialAlertTitle: (count: string) => `${count} aktív hivatalos cunamiriasztás`,
       clearBody: (feedLabel: string) =>
-        `A kiválasztott, ${feedLabel.toLocaleLowerCase()} időszakra vonatkozó adatfolyam jelenleg nem tartalmaz USGS cunamijelzéssel megjelölt földrengést.`,
+        `A NOAA/NWS aktuális ellenőrzése nem listáz aktív cunamival kapcsolatos hivatalos terméket, és a kiválasztott, ${feedLabel.toLocaleLowerCase()} időszakra vonatkozó adatfolyam sem tartalmaz USGS cunamijelzéssel megjelölt földrengést.`,
       flaggedBody: (feedLabel: string) =>
         `A kiválasztott, ${feedLabel.toLocaleLowerCase()} időszakra vonatkozó adatfolyam USGS cunamijelzéssel megjelölt eseményt is tartalmaz.`,
+      officialAlertBody:
+        'A NOAA/NWS jelenleg aktív cunamival kapcsolatos hivatalos terméket listáz. Az érintett területekért és teendőkért nyisd meg a hivatalos figyelmeztető központ üzenetét.',
       disclaimer:
-        'A dashboard csak az USGS eseményjelzőjét jeleníti meg. Mindig a hivatalos katasztrófavédelmi és cunamijelző központok tájékoztatását kövesd.',
+        'A dashboard az USGS eseményjelzőit és a NOAA/NWS aktív riasztási termékeit együtt jeleníti meg. Mindig a katasztrófavédelem és a hivatalos cunamijelző központok utasításait kövesd.',
+      officialAlerts: 'Hivatalos riasztások',
+      officialAlertList: 'Aktív NOAA/NWS cunamitermékek',
+      alertFeedLoading: 'NOAA/NWS aktív cunamiriasztások ellenőrzése...',
+      alertFeedUpdated: 'Riasztási adatfolyam ellenőrizve',
+      alertFeedUnavailable: 'A NOAA/NWS riasztási adatfolyam nem érhető el.',
+      alertFeedFallback: 'Nem sikerült betölteni az aktív NOAA/NWS cunamiriasztásokat.',
+      warningCenter: 'Tsunami.gov',
+      expires: 'Lejár',
       strongest: 'Legerősebb jelölt esemény',
       latest: 'Legfrissebb jelölt esemény',
       reviewEvents: 'Jelölt események áttekintése',
+      usgsFlagSummary: (count: string) => `${count} USGS-jelölés`,
       viewDetails: 'Részletek',
     },
     table: {
@@ -582,6 +637,7 @@ export const COPY: Record<Language, DashboardCopy> = {
       generated: 'Generálva',
       awaiting: 'USGS-adatokra vár',
       source: 'USGS GeoJSON-forrás',
+      tsunamiSource: 'NOAA/NWS cunamiriasztások',
     },
     magnitudeTone: {
       Major: 'Nagy',

@@ -1,3 +1,5 @@
+import type { Geometry } from 'geojson';
+
 export interface UsgsFeatureCollection {
   type: 'FeatureCollection';
   metadata?: {
@@ -80,4 +82,58 @@ export type SortDirection = 'asc' | 'desc';
 export interface SortState {
   key: SortKey;
   direction: SortDirection;
+}
+
+export type TsunamiAlertLevel = 'warning' | 'advisory' | 'watch' | 'statement' | 'other';
+
+export interface TsunamiAlert {
+  id: string;
+  level: TsunamiAlertLevel;
+  event: string;
+  headline: string;
+  area: string;
+  severity: string;
+  urgency: string;
+  certainty: string;
+  status: string;
+  messageType: string;
+  sent: string | null;
+  effective: string | null;
+  expires: string | null;
+  description: string;
+  instruction: string | null;
+  url: string;
+  geometry: Geometry | null;
+}
+
+export interface NwsAlertFeatureCollection {
+  type: 'FeatureCollection';
+  title?: string;
+  updated?: string;
+  features: NwsAlertFeature[];
+}
+
+export interface NwsAlertFeature {
+  id?: string;
+  type: 'Feature';
+  geometry: Geometry | null;
+  properties: {
+    '@id'?: string;
+    id?: string;
+    areaDesc?: string;
+    sent?: string | null;
+    effective?: string | null;
+    expires?: string | null;
+    status?: string;
+    messageType?: string;
+    severity?: string;
+    certainty?: string;
+    urgency?: string;
+    event?: string;
+    senderName?: string;
+    headline?: string | null;
+    description?: string | null;
+    instruction?: string | null;
+    web?: string | null;
+  };
 }

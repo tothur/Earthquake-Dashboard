@@ -1,15 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { CircleMarker, GeoJSON, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
-import { ExternalLink, Layers, MapPinned, Waves } from 'lucide-react';
-import type { Feature, GeoJsonObject } from 'geojson';
-import type { Earthquake } from '../types';
+import { ExternalLink, Layers, MapPinned, RadioTower, Waves } from 'lucide-react';
+import type { Feature, FeatureCollection, GeoJsonObject, Geometry } from 'geojson';
+import type { Earthquake, TsunamiAlert, TsunamiAlertLevel } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude, formatNumber, formatRelativeTime } from '../utils/format';
 import { getMostRecent, getStrongest, magnitudeTone, markerRadius } from '../utils/earthquakes';
 import type { DashboardCopy } from '../i18n';
 
 interface EarthquakeMapProps {
   quakes: Earthquake[];
+  tsunamiAlerts: TsunamiAlert[];
   copy: DashboardCopy;
   theme: 'light' | 'dark';
   focus: MapFocus;
@@ -44,6 +45,10 @@ interface QuakeCluster {
 
 type TectonicFeatureProperties = {
   Type?: string;
+};
+
+type TsunamiAlertFeatureProperties = {
+  alert: TsunamiAlert;
 };
 
 function FitBounds({ quakes, focus }: { quakes: Earthquake[]; focus: MapFocus }) {
@@ -125,6 +130,102 @@ function TectonicContextLayer({ theme }: { theme: 'light' | 'dark' }) {
           opacity: isSubduction ? 0.82 : 0.48,
           weight: isSubduction ? 1.8 : 1.15,
         };
+      }}
+    />
+  );
+}
+
+function tsunamiAlertColor(level: TsunamiAlertLevel, theme: 'light' | 'dark'): string {
+  if (level === 'warning') {
+    return theme === 'light' ? '#b91c1c' : '#ff5f6f';
+  }
+
+  if (level === 'advisory') {
+    return theme === 'light' ? '#c2410c' : '#f2794c';
+  }
+
+  if (level === 'watch') {
+    return theme === 'light' ? '#b45309' : '#f6b65f';
+  }
+
+  return theme === 'light' ? '#047857' : '#54d6a7';
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function TsunamiAlertLayer({
+  alerts,
+  copy,
+  theme,
+}: {
+  alerts: TsunamiAlert[];
+  copy: DashboardCopy;
+  theme: 'light' | 'dark';
+}) {
+  const data = useMemo<FeatureCollection<Geometry, TsunamiAlertFeatureProperties> | null>(() => {
+    const alertsWithGeometry = alerts.filter(
+      (alert): alert is TsunamiAlert & { geometry: Geometry } => alert.geometry !== null,
+    );
+    const features = alertsWithGeometry
+      .map(
+        (alert) =>
+          ({
+            type: 'Feature',
+            geometry: alert.geometry,
+            properties: { alert },
+          }) satisfies Feature<Geometry, TsunamiAlertFeatureProperties>,
+      );
+
+    return features.length > 0 ? { type: 'FeatureCollection', features } : null;
+  }, [alerts]);
+
+  if (!data) {
+    return null;
+  }
+
+  return (
+    <GeoJSON
+      key={`${theme}:${alerts.map((alert) => alert.id).join('|')}`}
+      data={data}
+      style={(feature?: Feature<Geometry, TsunamiAlertFeatureProperties>) => {
+        const alert = feature?.properties?.alert;
+        const color = tsunamiAlertColor(alert?.level ?? 'other', theme);
+
+        return {
+          color,
+          fillColor: color,
+          fillOpacity: theme === 'light' ? 0.2 : 0.24,
+          opacity: 0.92,
+          weight: 2,
+        };
+      }}
+      onEachFeature={(feature, layer) => {
+        const alert = (feature.properties as TsunamiAlertFeatureProperties | undefined)?.alert;
+        if (!alert) {
+          return;
+        }
+
+        layer.bindPopup(`
+          <div class="quake-popup-content">
+            <div class="quake-popup-kicker">${escapeHtml(alert.event)}</div>
+            <h3>${escapeHtml(alert.headline)}</h3>
+            <dl>
+              <div><dt>${escapeHtml(copy.map.alertArea)}</dt><dd>${escapeHtml(alert.area)}</dd></div>
+              <div><dt>${escapeHtml(copy.map.alertSeverity)}</dt><dd>${escapeHtml(alert.severity)}</dd></div>
+              <div><dt>${escapeHtml(copy.tsunami.expires)}</dt><dd>${escapeHtml(alert.expires ? formatDateTime(Date.parse(alert.expires), copy.locale) : copy.notAvailable)}</dd></div>
+            </dl>
+            <a href="${escapeHtml(alert.url)}" target="_blank" rel="noreferrer">
+              ${escapeHtml(copy.map.alertSource)}
+            </a>
+          </div>
+        `);
       }}
     />
   );
@@ -348,6 +449,7 @@ function ClusteredQuakeLayer({
 
 export function EarthquakeMap({
   quakes,
+  tsunamiAlerts,
   copy,
   theme,
   focus,
@@ -356,6 +458,7 @@ export function EarthquakeMap({
   isLoading,
 }: EarthquakeMapProps) {
   const [showTectonicContext, setShowTectonicContext] = useState(true);
+  const [showTsunamiAlerts, setShowTsunamiAlerts] = useState(true);
   const tileUrl =
     theme === 'light'
       ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
@@ -413,6 +516,20 @@ export function EarthquakeMap({
             >
               {copy.map.tectonicLayer}
             </button>
+            <button
+              type="button"
+              onClick={() => setShowTsunamiAlerts((isVisible) => !isVisible)}
+              className={`inline-flex h-7 items-center gap-1.5 rounded-[7px] px-2.5 font-semibold transition ${
+                showTsunamiAlerts
+                  ? 'bg-signal-orange/15 text-signal-orange'
+                  : 'text-slate-300 hover:bg-white/[0.08] hover:text-white'
+              }`}
+              aria-pressed={showTsunamiAlerts}
+              title={copy.map.tsunamiAlertsDescription}
+            >
+              <RadioTower size={13} aria-hidden="true" />
+              {copy.map.tsunamiAlertsLayer}
+            </button>
           </div>
           <div className="flex flex-wrap gap-2 text-xs text-slate-300">
             {showTectonicContext && (
@@ -426,6 +543,12 @@ export function EarthquakeMap({
                   {copy.map.subductionZone}
                 </span>
               </>
+            )}
+            {showTsunamiAlerts && tsunamiAlerts.length > 0 && (
+              <span className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-ink-900/80 px-2 py-1">
+                <span className="h-2.5 w-2.5 rounded-[3px] bg-signal-orange" />
+                {copy.map.tsunamiAlertArea}
+              </span>
             )}
             {[
               ['< M4', 'bg-signal-green'],
@@ -458,6 +581,7 @@ export function EarthquakeMap({
             url={tileUrl}
           />
           {showTectonicContext && <TectonicContextLayer theme={theme} />}
+          {showTsunamiAlerts && <TsunamiAlertLayer alerts={tsunamiAlerts} copy={copy} theme={theme} />}
           <FitBounds quakes={quakes} focus={focus} />
           <ClusteredQuakeLayer quakes={quakes} copy={copy} onQuakeSelect={onQuakeSelect} />
         </MapContainer>
