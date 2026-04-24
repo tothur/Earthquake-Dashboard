@@ -1,0 +1,139 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-width: 320px;
+    background: #080a0d;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    background:
+      linear-gradient(180deg, rgba(21, 29, 40, 0.85), rgba(8, 10, 13, 1) 32rem),
+      #080a0d;
+  }
+
+  button,
+  select,
+  input {
+    font: inherit;
+  }
+
+  a {
+    text-decoration: none;
+  }
+}
+
+.leaflet-container {
+  background: #080a0d;
+  font-family: inherit;
+}
+
+.leaflet-control-attribution {
+  border-radius: 8px 0 0 0;
+  background: rgba(8, 10, 13, 0.82) !important;
+  color: #94a3b8 !important;
+}
+
+.leaflet-control-attribution a {
+  color: #54d6a7 !important;
+}
+
+.leaflet-control-zoom a {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(13, 17, 23, 0.92) !important;
+  color: #f8fafc !important;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: #111822;
+  color: #f8fafc;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.38);
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+}
+
+.quake-popup-content {
+  width: 230px;
+  padding: 14px;
+}
+
+.quake-popup-kicker {
+  display: inline-flex;
+  border-radius: 8px;
+  background: rgba(246, 182, 95, 0.16);
+  color: #f6b65f;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.quake-popup-content h3 {
+  margin: 10px 0 12px;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.quake-popup-content dl {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 12px;
+}
+
+.quake-popup-content dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.quake-popup-content dt {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.quake-popup-content dd {
+  margin: 0;
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: right;
+}
+
+.quake-popup-content a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #54d6a7;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.quake-popup-content a:hover {
+  color: #fff;
+}
