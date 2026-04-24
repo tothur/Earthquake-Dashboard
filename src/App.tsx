@@ -247,9 +247,6 @@ function App() {
               {copy.appBadge}
             </div>
             <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">{copy.title}</h1>
-            <p className="mt-3 max-w-3xl text-base leading-7 text-slate-400">
-              {copy.subtitle}
-            </p>
           </div>
 
           <div className="flex w-fit flex-col gap-2 sm:items-end">
@@ -451,19 +448,22 @@ function App() {
           onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
         />
 
-        <footer className="flex flex-col gap-1 pb-3 text-center text-xs text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-2">
-          <span>{copy.footer.feedStatus}</span>
-          <span>{selectedFeedLabel}</span>
-          <span className="hidden sm:inline">·</span>
-          <span>{feedState.generatedAt ? `${copy.footer.generated} ${formatDateTime(feedState.generatedAt, copy.locale)}` : copy.footer.awaiting}</span>
-          <span className="hidden sm:inline">·</span>
-          <a href={selectedFeed.url} target="_blank" rel="noreferrer" className="text-signal-green transition hover:text-white">
-            {copy.footer.source}
-          </a>
-          <span className="hidden sm:inline">·</span>
-          <a href={TSUNAMI_ALERT_SOURCE_URL} target="_blank" rel="noreferrer" className="text-signal-green transition hover:text-white">
-            {copy.footer.tsunamiSource}
-          </a>
+        <footer className="flex flex-col items-center gap-2 pb-3 text-center text-xs text-slate-500">
+          <p className="max-w-4xl text-sm leading-6 text-slate-400">{copy.footer.description}</p>
+          <div className="flex flex-col gap-1 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-2">
+            <span>{copy.footer.feedStatus}</span>
+            <span>{selectedFeedLabel}</span>
+            <span className="hidden sm:inline">·</span>
+            <span>{feedState.generatedAt ? `${copy.footer.generated} ${formatDateTime(feedState.generatedAt, copy.locale)}` : copy.footer.awaiting}</span>
+            <span className="hidden sm:inline">·</span>
+            <a href={selectedFeed.url} target="_blank" rel="noreferrer" className="text-signal-green transition hover:text-white">
+              {copy.footer.source}
+            </a>
+            <span className="hidden sm:inline">·</span>
+            <a href={TSUNAMI_ALERT_SOURCE_URL} target="_blank" rel="noreferrer" className="text-signal-green transition hover:text-white">
+              {copy.footer.tsunamiSource}
+            </a>
+          </div>
         </footer>
       </div>
       <EventDetailPanel quake={selectedQuake} copy={copy} onClose={() => setSelectedQuakeId(null)} />

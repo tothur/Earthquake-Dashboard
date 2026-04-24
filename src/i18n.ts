@@ -187,6 +187,7 @@ export interface DashboardCopy {
     no: string;
   };
   footer: {
+    description: string;
     feedStatus: string;
     generated: string;
     awaiting: string;
@@ -408,6 +409,8 @@ export const COPY: Record<Language, DashboardCopy> = {
       no: 'No',
     },
     footer: {
+      description:
+        'Real-time global seismic monitoring using official USGS GeoJSON feeds, with magnitude-scaled map markers, live summary metrics, and sortable event detail.',
       feedStatus: 'Feed status:',
       generated: 'Generated',
       awaiting: 'Awaiting USGS data',
@@ -633,6 +636,8 @@ export const COPY: Record<Language, DashboardCopy> = {
       no: 'Nem',
     },
     footer: {
+      description:
+        'Valós idejű globális szeizmikus megfigyelés hivatalos USGS GeoJSON-adatokkal, magnitúdó szerint méretezett térképjelölőkkel, élő összesítő mutatókkal és rendezhető eseményrészletekkel.',
       feedStatus: 'Adatfolyam:',
       generated: 'Generálva',
       awaiting: 'USGS-adatokra vár',
