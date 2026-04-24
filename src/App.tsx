@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { FEEDS } from './data/feeds';
 import { EarthquakeMap } from './components/EarthquakeMap';
+import type { MapFocus } from './components/EarthquakeMap';
 import { EarthquakeTable } from './components/EarthquakeTable';
 import { FilterBar } from './components/FilterBar';
 import { MajorQuakeHighlight } from './components/MajorQuakeHighlight';
@@ -53,6 +54,7 @@ function App() {
   const [selectedFeedId, setSelectedFeedId] = useState<FeedId>(initialFeedId);
   const [minimumMagnitude, setMinimumMagnitude] = useState(0);
   const [majorMagnitudeThreshold, setMajorMagnitudeThreshold] = useState(7);
+  const [mapFocus, setMapFocus] = useState<MapFocus>('global');
   const [refreshToken, setRefreshToken] = useState(0);
   const [sortState, setSortState] = useState<SortState>({ key: 'time', direction: 'desc' });
   const [isRecentListOpen, setIsRecentListOpen] = useState(false);
@@ -338,6 +340,8 @@ function App() {
           quakes={filteredQuakes}
           copy={copy}
           theme={resolvedTheme}
+          focus={mapFocus}
+          onFocusChange={setMapFocus}
           isLoading={isLoading && feedState.quakes.length === 0}
         />
 

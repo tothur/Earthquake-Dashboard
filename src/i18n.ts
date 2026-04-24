@@ -67,6 +67,12 @@ export interface DashboardCopy {
   map: {
     title: string;
     subtitle: string;
+    focusLabel: string;
+    focus: {
+      global: string;
+      europe: string;
+      hungary: string;
+    };
     loading: string;
     empty: string;
     depth: string;
@@ -175,6 +181,12 @@ export const COPY: Record<Language, DashboardCopy> = {
     map: {
       title: 'Global Seismic Map',
       subtitle: 'Marker color and size scale with reported magnitude.',
+      focusLabel: 'Map focus',
+      focus: {
+        global: 'Global',
+        europe: 'Europe',
+        hungary: 'Hungary',
+      },
       loading: 'Loading USGS feed',
       empty: 'No earthquakes match the active filters.',
       depth: 'Depth',
@@ -294,6 +306,12 @@ export const COPY: Record<Language, DashboardCopy> = {
     map: {
       title: 'Globális szeizmikus térkép',
       subtitle: 'A jelölők színe és mérete a jelentett magnitúdót követi.',
+      focusLabel: 'Térképfókusz',
+      focus: {
+        global: 'Globális',
+        europe: 'Európa',
+        hungary: 'Magyarország',
+      },
       loading: 'USGS-adatok betöltése',
       empty: 'Nincs rengés az aktív szűrők szerint.',
       depth: 'Mélység',
