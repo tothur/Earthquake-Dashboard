@@ -210,3 +210,45 @@
 .quake-popup-content a:hover {
   color: rgb(var(--color-white));
 }
+
+.leaflet-tooltip.quake-cluster-count-tooltip {
+  display: grid;
+  min-width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  background: rgba(8, 10, 13, 0.52);
+  box-shadow: none;
+  color: rgb(var(--color-white));
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0 0.35rem;
+  pointer-events: none;
+}
+
+.leaflet-tooltip.quake-cluster-count-tooltip::before {
+  display: none;
+}
+
+.quake-cluster-popup-content button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 34px;
+  border: 1px solid rgba(var(--color-signal-green), 0.35);
+  border-radius: 8px;
+  background: rgba(var(--color-signal-green), 0.12);
+  color: rgb(var(--color-signal-green));
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quake-cluster-popup-content button:hover {
+  border-color: rgba(var(--color-signal-green), 0.55);
+  background: rgba(var(--color-signal-green), 0.18);
+  color: rgb(var(--color-white));
+}

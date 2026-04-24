@@ -16,6 +16,7 @@ import { FEEDS } from './data/feeds';
 import { EarthquakeMap } from './components/EarthquakeMap';
 import type { MapFocus } from './components/EarthquakeMap';
 import { EarthquakeTable } from './components/EarthquakeTable';
+import { EarthquakeTimeline } from './components/EarthquakeTimeline';
 import { FilterBar } from './components/FilterBar';
 import { MajorQuakeHighlight } from './components/MajorQuakeHighlight';
 import { StatCard } from './components/StatCard';
@@ -335,6 +336,13 @@ function App() {
             tone="red"
           />
         </section>
+
+        <EarthquakeTimeline
+          quakes={filteredQuakes}
+          feedId={selectedFeedId}
+          copy={copy}
+          isLoading={isLoading && feedState.quakes.length === 0}
+        />
 
         <EarthquakeMap
           quakes={filteredQuakes}

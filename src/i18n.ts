@@ -73,10 +73,24 @@ export interface DashboardCopy {
       europe: string;
       hungary: string;
     };
+    cluster: (count: string) => string;
+    clusterTitle: (count: string) => string;
+    clusterStrongest: string;
+    clusterLatest: string;
+    zoomCluster: string;
     loading: string;
     empty: string;
     depth: string;
     time: string;
+  };
+  timeline: {
+    title: string;
+    subtitle: string;
+    empty: string;
+    eventCount: (count: string) => string;
+    peak: string;
+    strongest: string;
+    interval: (start: string, end: string) => string;
   };
   table: {
     title: string;
@@ -187,10 +201,24 @@ export const COPY: Record<Language, DashboardCopy> = {
         europe: 'Europe',
         hungary: 'Hungary',
       },
+      cluster: (count: string) => `${count} events`,
+      clusterTitle: (count: string) => `${count} earthquakes in this cluster`,
+      clusterStrongest: 'Strongest',
+      clusterLatest: 'Latest',
+      zoomCluster: 'Zoom to cluster',
       loading: 'Loading USGS feed',
       empty: 'No earthquakes match the active filters.',
       depth: 'Depth',
       time: 'Time',
+    },
+    timeline: {
+      title: 'Earthquake Timeline',
+      subtitle: 'Event density across the selected feed window.',
+      empty: 'No timeline activity for the active filters.',
+      eventCount: (count: string) => `${count} events`,
+      peak: 'Peak interval',
+      strongest: 'Strongest event',
+      interval: (start: string, end: string) => `${start} - ${end}`,
     },
     table: {
       title: 'Recent Earthquakes',
@@ -312,10 +340,24 @@ export const COPY: Record<Language, DashboardCopy> = {
         europe: 'Európa',
         hungary: 'Magyarország',
       },
+      cluster: (count: string) => `${count} esemény`,
+      clusterTitle: (count: string) => `${count} földrengés ebben a csoportban`,
+      clusterStrongest: 'Legerősebb',
+      clusterLatest: 'Legfrissebb',
+      zoomCluster: 'Ráközelítés',
       loading: 'USGS-adatok betöltése',
       empty: 'Nincs rengés az aktív szűrők szerint.',
       depth: 'Mélység',
       time: 'Idő',
+    },
+    timeline: {
+      title: 'Földrengés-idővonal',
+      subtitle: 'Az eseménysűrűség a kiválasztott adatfolyam időablakában.',
+      empty: 'Nincs idővonali aktivitás az aktuális szűrőkkel.',
+      eventCount: (count: string) => `${count} esemény`,
+      peak: 'Legaktívabb időszak',
+      strongest: 'Legerősebb esemény',
+      interval: (start: string, end: string) => `${start} - ${end}`,
     },
     table: {
       title: 'Legutóbbi földrengések',

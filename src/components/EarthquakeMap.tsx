@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { CircleMarker, MapContainer, Popup, TileLayer, useMap } from 'react-leaflet';
+import { useEffect, useMemo, useState } from 'react';
+import { CircleMarker, MapContainer, Popup, TileLayer, Tooltip, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { ExternalLink, MapPinned } from 'lucide-react';
 import type { Earthquake } from '../types';
-import { formatDateTime, formatDepth, formatMagnitude } from '../utils/format';
-import { magnitudeTone, markerRadius } from '../utils/earthquakes';
+import { formatDateTime, formatDepth, formatMagnitude, formatNumber, formatRelativeTime } from '../utils/format';
+import { getMostRecent, getStrongest, magnitudeTone, markerRadius } from '../utils/earthquakes';
 import type { DashboardCopy } from '../i18n';
 
 interface EarthquakeMapProps {
@@ -30,6 +30,14 @@ const focusBounds: Record<Exclude<MapFocus, 'global'>, L.LatLngBoundsExpression>
 };
 
 const focusOptions: MapFocus[] = ['global', 'europe', 'hungary'];
+
+interface QuakeCluster {
+  id: string;
+  quakes: Earthquake[];
+  latitude: number;
+  longitude: number;
+  strongestMagnitude: number | null;
+}
 
 function FitBounds({ quakes, focus }: { quakes: Earthquake[]; focus: MapFocus }) {
   const map = useMap();
@@ -58,6 +66,192 @@ function FitBounds({ quakes, focus }: { quakes: Earthquake[]; focus: MapFocus })
   }, [focus, map, quakes]);
 
   return null;
+}
+
+function getClusterCellSize(zoom: number): number {
+  if (zoom <= 3) {
+    return 72;
+  }
+
+  if (zoom <= 5) {
+    return 58;
+  }
+
+  return 44;
+}
+
+function buildClusters(quakes: Earthquake[], map: L.Map, zoom: number): QuakeCluster[] {
+  const cellSize = getClusterCellSize(zoom);
+  const buckets = new Map<string, Earthquake[]>();
+
+  quakes.forEach((quake) => {
+    const point = map.project([quake.latitude, quake.longitude], zoom);
+    const key = `${Math.floor(point.x / cellSize)}:${Math.floor(point.y / cellSize)}`;
+    buckets.set(key, [...(buckets.get(key) ?? []), quake]);
+  });
+
+  return Array.from(buckets.entries()).map(([key, bucketQuakes]) => {
+    const strongest = getStrongest(bucketQuakes);
+    const latitude =
+      bucketQuakes.reduce((total, quake) => total + quake.latitude, 0) / bucketQuakes.length;
+    const longitude =
+      bucketQuakes.reduce((total, quake) => total + quake.longitude, 0) / bucketQuakes.length;
+
+    return {
+      id: key,
+      quakes: bucketQuakes,
+      latitude,
+      longitude,
+      strongestMagnitude: strongest?.magnitude ?? null,
+    };
+  });
+}
+
+function clusterRadius(count: number): number {
+  return Math.max(18, Math.min(31, 15 + Math.sqrt(count) * 4.5));
+}
+
+function QuakePopup({ quake, copy }: { quake: Earthquake; copy: DashboardCopy }) {
+  return (
+    <div className="quake-popup-content">
+      <div className="quake-popup-kicker">
+        {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
+      </div>
+      <h3>{quake.place}</h3>
+      <dl>
+        <div>
+          <dt>{copy.map.depth}</dt>
+          <dd>{formatDepth(quake.depthKm, copy.locale)}</dd>
+        </div>
+        <div>
+          <dt>{copy.map.time}</dt>
+          <dd>{formatDateTime(quake.time, copy.locale)}</dd>
+        </div>
+      </dl>
+      <a href={quake.url} target="_blank" rel="noreferrer">
+        {copy.major.usgsEvent} <ExternalLink size={13} aria-hidden="true" />
+      </a>
+    </div>
+  );
+}
+
+function ClusterPopup({ cluster, copy, map }: { cluster: QuakeCluster; copy: DashboardCopy; map: L.Map }) {
+  const strongest = getStrongest(cluster.quakes);
+  const latest = getMostRecent(cluster.quakes);
+  const countLabel = formatNumber(cluster.quakes.length, copy.locale);
+
+  function zoomToCluster() {
+    const bounds = L.latLngBounds(cluster.quakes.map((quake) => [quake.latitude, quake.longitude]));
+    map.fitBounds(bounds.pad(0.35), {
+      animate: true,
+      duration: 0.7,
+      maxZoom: 9,
+    });
+  }
+
+  return (
+    <div className="quake-popup-content quake-cluster-popup-content">
+      <div className="quake-popup-kicker">{copy.map.cluster(countLabel)}</div>
+      <h3>{copy.map.clusterTitle(countLabel)}</h3>
+      <dl>
+        <div>
+          <dt>{copy.map.clusterStrongest}</dt>
+          <dd>
+            {strongest
+              ? formatMagnitude(strongest.magnitude, copy.locale, copy.pendingMagnitude)
+              : copy.notAvailable}
+          </dd>
+        </div>
+        <div>
+          <dt>{copy.map.clusterLatest}</dt>
+          <dd>{latest ? formatRelativeTime(latest.time, copy.locale) : copy.notAvailable}</dd>
+        </div>
+      </dl>
+      <button type="button" onClick={zoomToCluster}>
+        {copy.map.zoomCluster}
+      </button>
+    </div>
+  );
+}
+
+function ClusteredQuakeLayer({ quakes, copy }: { quakes: Earthquake[]; copy: DashboardCopy }) {
+  const map = useMap();
+  const [viewState, setViewState] = useState(() => ({
+    zoom: map.getZoom(),
+    bounds: map.getBounds(),
+  }));
+
+  const updateViewState = () => {
+    setViewState({
+      zoom: map.getZoom(),
+      bounds: map.getBounds(),
+    });
+  };
+
+  useMapEvents({
+    moveend: updateViewState,
+    zoomend: updateViewState,
+  });
+
+  const clusters = useMemo(() => {
+    const paddedBounds = viewState.bounds.pad(0.25);
+    const visibleQuakes = quakes.filter((quake) => paddedBounds.contains([quake.latitude, quake.longitude]));
+    return buildClusters(visibleQuakes, map, viewState.zoom);
+  }, [map, quakes, viewState]);
+
+  return (
+    <>
+      {clusters.map((cluster) => {
+        if (cluster.quakes.length === 1) {
+          const quake = cluster.quakes[0];
+          const tone = magnitudeTone(quake.magnitude);
+
+          return (
+            <CircleMarker
+              key={quake.id}
+              center={[quake.latitude, quake.longitude]}
+              radius={markerRadius(quake.magnitude)}
+              pathOptions={{
+                color: tone.color,
+                fillColor: tone.color,
+                fillOpacity: 0.48,
+                opacity: 0.95,
+                weight: 1.5,
+              }}
+            >
+              <Popup>
+                <QuakePopup quake={quake} copy={copy} />
+              </Popup>
+            </CircleMarker>
+          );
+        }
+
+        const tone = magnitudeTone(cluster.strongestMagnitude);
+
+        return (
+          <CircleMarker
+            key={cluster.id}
+            center={[cluster.latitude, cluster.longitude]}
+            radius={clusterRadius(cluster.quakes.length)}
+            pathOptions={{
+              color: tone.color,
+              fillColor: tone.color,
+              fillOpacity: 0.34,
+              opacity: 0.95,
+              weight: 2,
+            }}
+          >
+            <Tooltip permanent direction="center" className="quake-cluster-count-tooltip" opacity={1}>
+              {formatNumber(cluster.quakes.length, copy.locale)}
+            </Tooltip>
+            <Popup>
+              <ClusterPopup cluster={cluster} copy={copy} map={map} />
+            </Popup>
+          </CircleMarker>
+        );
+      })}
+    </>
+  );
 }
 
 export function EarthquakeMap({ quakes, copy, theme, focus, onFocusChange, isLoading }: EarthquakeMapProps) {
@@ -129,45 +323,7 @@ export function EarthquakeMap({ quakes, copy, theme, focus, onFocusChange, isLoa
             url={tileUrl}
           />
           <FitBounds quakes={quakes} focus={focus} />
-          {quakes.map((quake) => {
-            const tone = magnitudeTone(quake.magnitude);
-            return (
-              <CircleMarker
-                key={quake.id}
-                center={[quake.latitude, quake.longitude]}
-                radius={markerRadius(quake.magnitude)}
-                pathOptions={{
-                  color: tone.color,
-                  fillColor: tone.color,
-                  fillOpacity: 0.48,
-                  opacity: 0.95,
-                  weight: 1.5,
-                }}
-              >
-                <Popup>
-                  <div className="quake-popup-content">
-                    <div className="quake-popup-kicker">
-                      {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
-                    </div>
-                    <h3>{quake.place}</h3>
-                    <dl>
-                      <div>
-                        <dt>{copy.map.depth}</dt>
-                        <dd>{formatDepth(quake.depthKm, copy.locale)}</dd>
-                      </div>
-                      <div>
-                        <dt>{copy.map.time}</dt>
-                        <dd>{formatDateTime(quake.time, copy.locale)}</dd>
-                      </div>
-                    </dl>
-                    <a href={quake.url} target="_blank" rel="noreferrer">
-                      {copy.major.usgsEvent} <ExternalLink size={13} aria-hidden="true" />
-                    </a>
-                  </div>
-                </Popup>
-              </CircleMarker>
-            );
-          })}
+          <ClusteredQuakeLayer quakes={quakes} copy={copy} />
         </MapContainer>
 
         {isLoading && (
