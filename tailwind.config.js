@@ -20,11 +20,11 @@ export default {
           700: 'rgb(var(--color-ink-700) / <alpha-value>)',
         },
         signal: {
-          green: '#54d6a7',
-          amber: '#f6b65f',
-          orange: '#f2794c',
-          red: '#e34d59',
-          violet: '#b86cff',
+          green: 'rgb(var(--color-signal-green) / <alpha-value>)',
+          amber: 'rgb(var(--color-signal-amber) / <alpha-value>)',
+          orange: 'rgb(var(--color-signal-orange) / <alpha-value>)',
+          red: 'rgb(var(--color-signal-red) / <alpha-value>)',
+          violet: 'rgb(var(--color-signal-violet) / <alpha-value>)',
         },
       },
       boxShadow: {
