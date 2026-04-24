@@ -13,6 +13,7 @@ interface EarthquakeMapProps {
   theme: 'light' | 'dark';
   focus: MapFocus;
   onFocusChange: (focus: MapFocus) => void;
+  onQuakeSelect: (quake: Earthquake) => void;
   isLoading: boolean;
 }
 
@@ -111,7 +112,15 @@ function clusterRadius(count: number): number {
   return Math.max(18, Math.min(31, 15 + Math.sqrt(count) * 4.5));
 }
 
-function QuakePopup({ quake, copy }: { quake: Earthquake; copy: DashboardCopy }) {
+function QuakePopup({
+  quake,
+  copy,
+  onQuakeSelect,
+}: {
+  quake: Earthquake;
+  copy: DashboardCopy;
+  onQuakeSelect: (quake: Earthquake) => void;
+}) {
   return (
     <div className="quake-popup-content">
       <div className="quake-popup-kicker">
@@ -128,9 +137,14 @@ function QuakePopup({ quake, copy }: { quake: Earthquake; copy: DashboardCopy })
           <dd>{formatDateTime(quake.time, copy.locale)}</dd>
         </div>
       </dl>
-      <a href={quake.url} target="_blank" rel="noreferrer">
-        {copy.major.usgsEvent} <ExternalLink size={13} aria-hidden="true" />
-      </a>
+      <div className="quake-popup-actions">
+        <button type="button" onClick={() => onQuakeSelect(quake)}>
+          {copy.detail.viewDetails}
+        </button>
+        <a href={quake.url} target="_blank" rel="noreferrer">
+          {copy.major.usgsEvent} <ExternalLink size={13} aria-hidden="true" />
+        </a>
+      </div>
     </div>
   );
 }
@@ -174,7 +188,15 @@ function ClusterPopup({ cluster, copy, map }: { cluster: QuakeCluster; copy: Das
   );
 }
 
-function ClusteredQuakeLayer({ quakes, copy }: { quakes: Earthquake[]; copy: DashboardCopy }) {
+function ClusteredQuakeLayer({
+  quakes,
+  copy,
+  onQuakeSelect,
+}: {
+  quakes: Earthquake[];
+  copy: DashboardCopy;
+  onQuakeSelect: (quake: Earthquake) => void;
+}) {
   const map = useMap();
   const [viewState, setViewState] = useState(() => ({
     zoom: map.getZoom(),
@@ -218,9 +240,12 @@ function ClusteredQuakeLayer({ quakes, copy }: { quakes: Earthquake[]; copy: Das
                 opacity: 0.95,
                 weight: 1.5,
               }}
+              eventHandlers={{
+                click: () => onQuakeSelect(quake),
+              }}
             >
               <Popup>
-                <QuakePopup quake={quake} copy={copy} />
+                <QuakePopup quake={quake} copy={copy} onQuakeSelect={onQuakeSelect} />
               </Popup>
             </CircleMarker>
           );
@@ -254,7 +279,15 @@ function ClusteredQuakeLayer({ quakes, copy }: { quakes: Earthquake[]; copy: Das
   );
 }
 
-export function EarthquakeMap({ quakes, copy, theme, focus, onFocusChange, isLoading }: EarthquakeMapProps) {
+export function EarthquakeMap({
+  quakes,
+  copy,
+  theme,
+  focus,
+  onFocusChange,
+  onQuakeSelect,
+  isLoading,
+}: EarthquakeMapProps) {
   const tileUrl =
     theme === 'light'
       ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
@@ -323,7 +356,7 @@ export function EarthquakeMap({ quakes, copy, theme, focus, onFocusChange, isLoa
             url={tileUrl}
           />
           <FitBounds quakes={quakes} focus={focus} />
-          <ClusteredQuakeLayer quakes={quakes} copy={copy} />
+          <ClusteredQuakeLayer quakes={quakes} copy={copy} onQuakeSelect={onQuakeSelect} />
         </MapContainer>
 
         {isLoading && (

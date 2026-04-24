@@ -211,6 +211,32 @@
   color: rgb(var(--color-white));
 }
 
+.quake-popup-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.quake-popup-actions button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border: 1px solid rgba(var(--color-signal-green), 0.35);
+  border-radius: 8px;
+  background: rgba(var(--color-signal-green), 0.12);
+  color: rgb(var(--color-signal-green));
+  cursor: pointer;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.quake-popup-actions button:hover {
+  border-color: rgba(var(--color-signal-green), 0.55);
+  background: rgba(var(--color-signal-green), 0.18);
+  color: rgb(var(--color-white));
+}
+
 .leaflet-tooltip.quake-cluster-count-tooltip {
   display: grid;
   min-width: 1.75rem;

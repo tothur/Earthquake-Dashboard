@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ExternalLink, PanelRightOpen } from 'lucide-react';
 import clsx from 'clsx';
 import type { Earthquake, SortKey, SortState } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude, formatNumber, formatRelativeTime } from '../utils/format';
@@ -13,9 +13,19 @@ interface EarthquakeTableProps {
   isOpen: boolean;
   onToggle: () => void;
   onSortChange: (key: SortKey) => void;
+  onQuakeSelect: (quake: Earthquake) => void;
 }
 
-export function EarthquakeTable({ quakes, sortState, copy, isLoading, isOpen, onToggle, onSortChange }: EarthquakeTableProps) {
+export function EarthquakeTable({
+  quakes,
+  sortState,
+  copy,
+  isLoading,
+  isOpen,
+  onToggle,
+  onSortChange,
+  onQuakeSelect,
+}: EarthquakeTableProps) {
   const columns: Array<{ key: SortKey; label: string; align?: 'right' | 'left' }> = [
     { key: 'time', label: copy.table.columns.time },
     { key: 'magnitude', label: copy.table.columns.magnitude, align: 'right' },
@@ -121,7 +131,11 @@ export function EarthquakeTable({ quakes, sortState, copy, isLoading, isOpen, on
                   : quakes.map((quake) => {
                       const tone = magnitudeTone(quake.magnitude);
                       return (
-                        <tr key={quake.id} className="transition hover:bg-white/[0.035]">
+                        <tr
+                          key={quake.id}
+                          className="cursor-pointer transition hover:bg-white/[0.035]"
+                          onClick={() => onQuakeSelect(quake)}
+                        >
                           <td className="px-4 py-4 align-top">
                             <div className="font-medium text-white">{formatRelativeTime(quake.time, copy.locale)}</div>
                             <div className="mt-1 text-sm text-slate-400">{formatDateTime(quake.time, copy.locale)}</div>
@@ -146,10 +160,22 @@ export function EarthquakeTable({ quakes, sortState, copy, isLoading, isOpen, on
                             </div>
                           </td>
                           <td className="px-4 py-4 text-right align-top">
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onQuakeSelect(quake);
+                              }}
+                              className="mr-2 inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.05] text-slate-200 transition hover:border-white/20 hover:bg-white/[0.1] hover:text-white"
+                              aria-label={copy.table.openDetails(quake.place)}
+                            >
+                              <PanelRightOpen size={16} aria-hidden="true" />
+                            </button>
                             <a
                               href={quake.url}
                               target="_blank"
                               rel="noreferrer"
+                              onClick={(event) => event.stopPropagation()}
                               className="inline-flex h-9 w-9 items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.05] text-slate-200 transition hover:border-white/20 hover:bg-white/[0.1] hover:text-white"
                               aria-label={copy.table.openEvent(quake.place)}
                             >

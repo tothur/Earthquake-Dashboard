@@ -17,6 +17,7 @@ import { EarthquakeMap } from './components/EarthquakeMap';
 import type { MapFocus } from './components/EarthquakeMap';
 import { EarthquakeTable } from './components/EarthquakeTable';
 import { EarthquakeTimeline } from './components/EarthquakeTimeline';
+import { EventDetailPanel } from './components/EventDetailPanel';
 import { FilterBar } from './components/FilterBar';
 import { MajorQuakeHighlight } from './components/MajorQuakeHighlight';
 import { StatCard } from './components/StatCard';
@@ -59,6 +60,7 @@ function App() {
   const [refreshToken, setRefreshToken] = useState(0);
   const [sortState, setSortState] = useState<SortState>({ key: 'time', direction: 'desc' });
   const [isRecentListOpen, setIsRecentListOpen] = useState(false);
+  const [selectedQuakeId, setSelectedQuakeId] = useState<string | null>(null);
   const [feedState, setFeedState] = useState<FeedState>({
     status: 'idle',
     feedId: initialFeedId,
@@ -163,7 +165,17 @@ function App() {
     [feedState.quakes, majorMagnitudeThreshold],
   );
   const closestToHungary = useMemo(() => getClosestToHungary(filteredQuakes), [filteredQuakes]);
+  const selectedQuake = useMemo(
+    () => feedState.quakes.find((quake) => quake.id === selectedQuakeId) ?? null,
+    [feedState.quakes, selectedQuakeId],
+  );
   const isLoading = feedState.status === 'loading';
+
+  useEffect(() => {
+    if (selectedQuakeId && !selectedQuake && feedState.status === 'success') {
+      setSelectedQuakeId(null);
+    }
+  }, [feedState.status, selectedQuake, selectedQuakeId]);
 
   function handleSortChange(key: SortKey) {
     setSortState((current) => ({
@@ -293,6 +305,7 @@ function App() {
           magnitudeThreshold={majorMagnitudeThreshold}
           copy={copy}
           isLoading={isLoading && feedState.quakes.length === 0}
+          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
         />
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -350,6 +363,7 @@ function App() {
           theme={resolvedTheme}
           focus={mapFocus}
           onFocusChange={setMapFocus}
+          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
           isLoading={isLoading && feedState.quakes.length === 0}
         />
 
@@ -361,6 +375,7 @@ function App() {
           isOpen={isRecentListOpen}
           onToggle={() => setIsRecentListOpen((isOpen) => !isOpen)}
           onSortChange={handleSortChange}
+          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
         />
 
         <footer className="flex flex-col gap-1 pb-3 text-center text-xs text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-2">
@@ -374,6 +389,7 @@ function App() {
           </a>
         </footer>
       </div>
+      <EventDetailPanel quake={selectedQuake} copy={copy} onClose={() => setSelectedQuakeId(null)} />
     </div>
   );
 }

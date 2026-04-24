@@ -102,9 +102,36 @@ export interface DashboardCopy {
     status: string;
     feltReports: string;
     tsunamiFlag: string;
+    openDetails: (place: string) => string;
     openEvent: (place: string) => string;
     emptyTitle: string;
     emptyBody: string;
+  };
+  detail: {
+    title: string;
+    subtitle: string;
+    close: string;
+    viewDetails: string;
+    overview: string;
+    metrics: string;
+    metadata: string;
+    coordinates: string;
+    latitude: string;
+    longitude: string;
+    depth: string;
+    magnitude: string;
+    magnitudeType: string;
+    originTime: string;
+    updated: string;
+    status: string;
+    alert: string;
+    tsunamiFlag: string;
+    feltReports: string;
+    significance: string;
+    usgsEvent: string;
+    noAlert: string;
+    yes: string;
+    no: string;
   };
   footer: {
     feedStatus: string;
@@ -237,9 +264,36 @@ export const COPY: Record<Language, DashboardCopy> = {
       status: 'Status',
       feltReports: 'Felt reports',
       tsunamiFlag: 'Tsunami flag',
+      openDetails: (place: string) => `Open details for ${place}`,
       openEvent: (place: string) => `Open USGS event for ${place}`,
       emptyTitle: 'No earthquakes match the current filters.',
       emptyBody: 'Lower the minimum magnitude or choose a wider time range.',
+    },
+    detail: {
+      title: 'Event details',
+      subtitle: 'USGS event metadata',
+      close: 'Close detail panel',
+      viewDetails: 'View details',
+      overview: 'Overview',
+      metrics: 'Metrics',
+      metadata: 'Metadata',
+      coordinates: 'Coordinates',
+      latitude: 'Latitude',
+      longitude: 'Longitude',
+      depth: 'Depth',
+      magnitude: 'Magnitude',
+      magnitudeType: 'Magnitude type',
+      originTime: 'Origin time',
+      updated: 'Updated',
+      status: 'Status',
+      alert: 'Alert',
+      tsunamiFlag: 'Tsunami flag',
+      feltReports: 'Felt reports',
+      significance: 'Significance',
+      usgsEvent: 'USGS event',
+      noAlert: 'No alert level',
+      yes: 'Yes',
+      no: 'No',
     },
     footer: {
       feedStatus: 'Feed status:',
@@ -376,9 +430,36 @@ export const COPY: Record<Language, DashboardCopy> = {
       status: 'Állapot',
       feltReports: 'Észlelések',
       tsunamiFlag: 'Cunamijelzés',
+      openDetails: (place: string) => `Részletek megnyitása: ${place}`,
       openEvent: (place: string) => `USGS esemény megnyitása: ${place}`,
       emptyTitle: 'Nincs találat az aktuális szűrőkkel.',
       emptyBody: 'Csökkentsd a minimális magnitúdót, vagy válassz hosszabb időszakot.',
+    },
+    detail: {
+      title: 'Esemény részletei',
+      subtitle: 'USGS eseményadatok',
+      close: 'Részletpanel bezárása',
+      viewDetails: 'Részletek',
+      overview: 'Áttekintés',
+      metrics: 'Mérőszámok',
+      metadata: 'Metaadatok',
+      coordinates: 'Koordináták',
+      latitude: 'Szélesség',
+      longitude: 'Hosszúság',
+      depth: 'Mélység',
+      magnitude: 'Magnitúdó',
+      magnitudeType: 'Magnitúdótípus',
+      originTime: 'Keletkezési idő',
+      updated: 'Frissítve',
+      status: 'Állapot',
+      alert: 'Riasztás',
+      tsunamiFlag: 'Cunamijelzés',
+      feltReports: 'Észlelések',
+      significance: 'Jelentőség',
+      usgsEvent: 'USGS esemény',
+      noAlert: 'Nincs riasztási szint',
+      yes: 'Igen',
+      no: 'Nem',
     },
     footer: {
       feedStatus: 'Adatfolyam:',

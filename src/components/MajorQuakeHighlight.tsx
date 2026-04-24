@@ -1,4 +1,4 @@
-import { AlertTriangle, ExternalLink, RadioTower, Waves } from 'lucide-react';
+import { AlertTriangle, ExternalLink, PanelRightOpen, RadioTower, Waves } from 'lucide-react';
 import type { Earthquake } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude, formatRelativeTime } from '../utils/format';
 import { magnitudeTone } from '../utils/earthquakes';
@@ -12,9 +12,17 @@ interface MajorQuakeHighlightProps {
   magnitudeThreshold: number;
   copy: DashboardCopy;
   isLoading: boolean;
+  onQuakeSelect: (quake: Earthquake) => void;
 }
 
-export function MajorQuakeHighlight({ quake, feedLabel, magnitudeThreshold, copy, isLoading }: MajorQuakeHighlightProps) {
+export function MajorQuakeHighlight({
+  quake,
+  feedLabel,
+  magnitudeThreshold,
+  copy,
+  isLoading,
+  onQuakeSelect,
+}: MajorQuakeHighlightProps) {
   const thresholdLabel = formatMagnitude(magnitudeThreshold, copy.locale, copy.pendingMagnitude) + '+';
 
   if (isLoading) {
@@ -96,6 +104,14 @@ export function MajorQuakeHighlight({ quake, feedLabel, magnitudeThreshold, copy
           </div>
           <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:items-center">
             <p className="text-sm text-slate-400">{copy.major.originTime}: {formatDateTime(quake.time, copy.locale)}</p>
+            <button
+              type="button"
+              onClick={() => onQuakeSelect(quake)}
+              className="inline-flex w-fit items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.08] px-3 py-2 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.13]"
+            >
+              {copy.detail.viewDetails}
+              <PanelRightOpen size={15} aria-hidden="true" />
+            </button>
             <a
               href={quake.url}
               target="_blank"
