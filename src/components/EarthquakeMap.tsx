@@ -10,6 +10,7 @@ import type { DashboardCopy } from '../i18n';
 interface EarthquakeMapProps {
   quakes: Earthquake[];
   copy: DashboardCopy;
+  theme: 'light' | 'dark';
   isLoading: boolean;
 }
 
@@ -33,7 +34,12 @@ function FitBounds({ quakes }: { quakes: Earthquake[] }) {
   return null;
 }
 
-export function EarthquakeMap({ quakes, copy, isLoading }: EarthquakeMapProps) {
+export function EarthquakeMap({ quakes, copy, theme, isLoading }: EarthquakeMapProps) {
+  const tileUrl =
+    theme === 'light'
+      ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+      : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
   return (
     <section className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className="flex flex-col gap-2 border-b border-white/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
@@ -69,7 +75,7 @@ export function EarthquakeMap({ quakes, copy, isLoading }: EarthquakeMapProps) {
         >
           <TileLayer
             attribution='&copy; <a href="https://carto.com/attributions">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-            url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
+            url={tileUrl}
           />
           <FitBounds quakes={quakes} />
           {quakes.map((quake) => {

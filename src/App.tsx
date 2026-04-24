@@ -6,8 +6,11 @@ import {
   Globe2,
   Languages,
   MapPinned,
+  Monitor,
+  Moon,
   ShieldAlert,
   SignalHigh,
+  Sun,
 } from 'lucide-react';
 import { FEEDS } from './data/feeds';
 import { EarthquakeMap } from './components/EarthquakeMap';
@@ -30,6 +33,7 @@ import {
 import { formatDateTime, formatMagnitude, formatNumber, formatRelativeTime } from './utils/format';
 
 type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
+type ThemeMode = 'auto' | 'light' | 'dark';
 
 interface FeedState {
   status: LoadStatus;
@@ -44,6 +48,8 @@ const initialFeedId: FeedId = 'day';
 
 function App() {
   const [language, setLanguage] = useState<Language>('en');
+  const [themeMode, setThemeMode] = useState<ThemeMode>('auto');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
   const [selectedFeedId, setSelectedFeedId] = useState<FeedId>(initialFeedId);
   const [minimumMagnitude, setMinimumMagnitude] = useState(0);
   const [majorMagnitudeThreshold, setMajorMagnitudeThreshold] = useState(7);
@@ -65,6 +71,24 @@ function App() {
   );
   const copy = COPY[language];
   const selectedFeedLabel = copy.feeds[selectedFeed.id].label;
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+
+    function applyTheme() {
+      const resolvedTheme = themeMode === 'auto' ? (mediaQuery.matches ? 'dark' : 'light') : themeMode;
+      document.documentElement.dataset.theme = resolvedTheme;
+      setResolvedTheme(resolvedTheme);
+
+      const themeColor = resolvedTheme === 'dark' ? '#080a0d' : '#f8fafc';
+      document.querySelector('meta[name="theme-color"]')?.setAttribute('content', themeColor);
+    }
+
+    applyTheme();
+    mediaQuery.addEventListener('change', applyTheme);
+
+    return () => mediaQuery.removeEventListener('change', applyTheme);
+  }, [themeMode]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -160,30 +184,64 @@ function App() {
             </p>
           </div>
 
-          <div className="inline-flex w-fit items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel">
-            <span className="flex items-center gap-2 px-2 font-medium text-slate-400">
-              <Languages size={16} aria-hidden="true" />
-              {copy.language}
-            </span>
-            {(['en', 'hu'] as Language[]).map((option) => {
-              const isSelected = option === language;
-              return (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setLanguage(option)}
-                  className={`h-8 rounded-[8px] px-3 text-sm font-semibold transition ${
-                    isSelected
-                      ? 'bg-signal-green/15 text-signal-green'
-                      : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
-                  }`}
-                  aria-pressed={isSelected}
-                  aria-label={COPY[option].languageName}
-                >
-                  {COPY[option].languageShort}
-                </button>
-              );
-            })}
+          <div className="flex w-fit flex-col gap-2 sm:items-end">
+            <div className="inline-flex w-fit items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel">
+              <span className="flex items-center gap-2 px-2 font-medium text-slate-400">
+                <Languages size={16} aria-hidden="true" />
+                {copy.language}
+              </span>
+              {(['en', 'hu'] as Language[]).map((option) => {
+                const isSelected = option === language;
+                return (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setLanguage(option)}
+                    className={`h-8 rounded-[8px] px-3 text-sm font-semibold transition ${
+                      isSelected
+                        ? 'bg-signal-green/15 text-signal-green'
+                        : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
+                    }`}
+                    aria-pressed={isSelected}
+                    aria-label={COPY[option].languageName}
+                  >
+                    {COPY[option].languageShort}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="inline-flex w-fit items-center gap-1 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel">
+              <span className="flex items-center gap-2 px-2 font-medium text-slate-400">
+                <Monitor size={16} aria-hidden="true" />
+                {copy.theme.label}
+              </span>
+              {([
+                { mode: 'auto', label: copy.theme.auto, icon: Monitor },
+                { mode: 'light', label: copy.theme.light, icon: Sun },
+                { mode: 'dark', label: copy.theme.dark, icon: Moon },
+              ] as Array<{ mode: ThemeMode; label: string; icon: typeof Monitor }>).map(({ mode, label, icon: Icon }) => {
+                const isSelected = mode === themeMode;
+                return (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => setThemeMode(mode)}
+                    className={`inline-flex h-8 items-center gap-1.5 rounded-[8px] px-2.5 text-sm font-semibold transition ${
+                      isSelected
+                        ? 'bg-signal-green/15 text-signal-green'
+                        : 'text-slate-300 hover:bg-white/[0.07] hover:text-white'
+                    }`}
+                    aria-pressed={isSelected}
+                    aria-label={label}
+                    title={label}
+                  >
+                    <Icon size={15} aria-hidden="true" />
+                    <span className={mode === 'auto' ? 'hidden sm:inline' : 'sr-only'}>{label}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </header>
 
@@ -276,7 +334,12 @@ function App() {
           />
         </section>
 
-        <EarthquakeMap quakes={filteredQuakes} copy={copy} isLoading={isLoading && feedState.quakes.length === 0} />
+        <EarthquakeMap
+          quakes={filteredQuakes}
+          copy={copy}
+          theme={resolvedTheme}
+          isLoading={isLoading && feedState.quakes.length === 0}
+        />
 
         <EarthquakeTable
           quakes={sortedQuakes}

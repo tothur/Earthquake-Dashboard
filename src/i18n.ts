@@ -12,6 +12,12 @@ export interface DashboardCopy {
   locale: string;
   languageName: string;
   languageShort: string;
+  theme: {
+    label: string;
+    auto: string;
+    light: string;
+    dark: string;
+  };
   pendingMagnitude: string;
   notAvailable: string;
   appBadge: string;
@@ -94,6 +100,12 @@ export const COPY: Record<Language, DashboardCopy> = {
     locale: 'en-US',
     languageName: 'English',
     languageShort: 'EN',
+    theme: {
+      label: 'Theme',
+      auto: 'Auto',
+      light: 'Light',
+      dark: 'Dark',
+    },
     pendingMagnitude: 'Pending',
     notAvailable: 'None',
     appBadge: 'USGS Earthquake Hazards Program',
@@ -207,6 +219,12 @@ export const COPY: Record<Language, DashboardCopy> = {
     locale: 'hu-HU',
     languageName: 'Magyar',
     languageShort: 'HU',
+    theme: {
+      label: 'Téma',
+      auto: 'Automatikus',
+      light: 'Világos',
+      dark: 'Sötét',
+    },
     pendingMagnitude: 'Függőben',
     notAvailable: 'Nincs',
     appBadge: 'USGS földrengésfigyelő program',
