@@ -3,9 +3,8 @@ import {
   Activity,
   AlertTriangle,
   Clock3,
-  DatabaseZap,
   Globe2,
-  RadioTower,
+  MapPinned,
   ShieldAlert,
   SignalHigh,
 } from 'lucide-react';
@@ -19,7 +18,8 @@ import type { Earthquake, FeedId, SortKey, SortState, UsgsFeatureCollection } fr
 import {
   applyMinimumMagnitude,
   countAtLeast,
-  getLargestM7Plus,
+  getClosestToHungary,
+  getLargestAtLeast,
   getMostRecent,
   getStrongest,
   parseEarthquakes,
@@ -43,6 +43,7 @@ const initialFeedId: FeedId = 'day';
 function App() {
   const [selectedFeedId, setSelectedFeedId] = useState<FeedId>(initialFeedId);
   const [minimumMagnitude, setMinimumMagnitude] = useState(0);
+  const [majorMagnitudeThreshold, setMajorMagnitudeThreshold] = useState(7);
   const [refreshToken, setRefreshToken] = useState(0);
   const [sortState, setSortState] = useState<SortState>({ key: 'time', direction: 'desc' });
   const [isRecentListOpen, setIsRecentListOpen] = useState(false);
@@ -125,7 +126,11 @@ function App() {
 
   const strongest = useMemo(() => getStrongest(filteredQuakes), [filteredQuakes]);
   const mostRecent = useMemo(() => getMostRecent(filteredQuakes), [filteredQuakes]);
-  const majorQuake = useMemo(() => getLargestM7Plus(feedState.quakes), [feedState.quakes]);
+  const majorQuake = useMemo(
+    () => getLargestAtLeast(feedState.quakes, majorMagnitudeThreshold),
+    [feedState.quakes, majorMagnitudeThreshold],
+  );
+  const closestToHungary = useMemo(() => getClosestToHungary(filteredQuakes), [filteredQuakes]);
   const isLoading = feedState.status === 'loading';
 
   function handleSortChange(key: SortKey) {
@@ -155,9 +160,11 @@ function App() {
         <FilterBar
           selectedFeedId={selectedFeedId}
           minimumMagnitude={minimumMagnitude}
+          majorMagnitudeThreshold={majorMagnitudeThreshold}
           isLoading={isLoading}
           onFeedChange={setSelectedFeedId}
           onMinimumMagnitudeChange={setMinimumMagnitude}
+          onMajorMagnitudeThresholdChange={setMajorMagnitudeThreshold}
           onRefresh={() => setRefreshToken((token) => token + 1)}
         />
 
@@ -188,7 +195,12 @@ function App() {
           </section>
         )}
 
-        <MajorQuakeHighlight quake={majorQuake} feedLabel={selectedFeed.label} isLoading={isLoading && feedState.quakes.length === 0} />
+        <MajorQuakeHighlight
+          quake={majorQuake}
+          feedLabel={selectedFeed.label}
+          magnitudeThreshold={majorMagnitudeThreshold}
+          isLoading={isLoading && feedState.quakes.length === 0}
+        />
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           <StatCard
@@ -213,10 +225,14 @@ function App() {
             tone="violet"
           />
           <StatCard
-            icon={RadioTower}
-            label="Magnitude 5+"
-            value={formatNumber(countAtLeast(filteredQuakes, 5))}
-            detail="Events meeting or exceeding M 5.0"
+            icon={MapPinned}
+            label="Closest to Hungary"
+            value={closestToHungary ? `${formatNumber(Math.round(closestToHungary.distanceKm))} km` : 'None'}
+            detail={
+              closestToHungary
+                ? `${formatMagnitude(closestToHungary.quake.magnitude)} ${closestToHungary.quake.place}`
+                : 'No event in the current filter'
+            }
             tone="orange"
           />
           <StatCard
@@ -239,31 +255,15 @@ function App() {
           onSortChange={handleSortChange}
         />
 
-        <section className="rounded-[8px] border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-slate-300 shadow-panel">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="flex items-center gap-2 font-semibold text-white">
-                <DatabaseZap size={16} className="text-signal-green" aria-hidden="true" />
-                Feed status
-              </div>
-              <p className="mt-2">
-                {feedState.generatedAt ? `Generated ${formatDateTime(feedState.generatedAt)}` : 'Awaiting USGS data'}
-              </p>
-              <p className="mt-1 text-slate-400">{feedState.sourceTitle || selectedFeed.description}</p>
-            </div>
-            <a
-              href={selectedFeed.url}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex w-fit items-center rounded-[8px] border border-white/10 bg-white/[0.06] px-3 py-2 font-semibold text-signal-green transition hover:border-white/20 hover:bg-white/[0.1] hover:text-white"
-            >
-              Open source feed
-            </a>
-          </div>
-        </section>
-
-        <footer className="pb-3 text-center text-xs text-slate-500">
-          {feedState.sourceTitle || selectedFeed.description} Data is fetched directly in the browser from USGS.
+        <footer className="flex flex-col gap-1 pb-3 text-center text-xs text-slate-500 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center sm:gap-x-2">
+          <span>Feed status:</span>
+          <span>{feedState.sourceTitle || selectedFeed.description}</span>
+          <span className="hidden sm:inline">·</span>
+          <span>{feedState.generatedAt ? `Generated ${formatDateTime(feedState.generatedAt)}` : 'Awaiting USGS data'}</span>
+          <span className="hidden sm:inline">·</span>
+          <a href={selectedFeed.url} target="_blank" rel="noreferrer" className="text-signal-green transition hover:text-white">
+            Source GeoJSON
+          </a>
         </footer>
       </div>
     </div>

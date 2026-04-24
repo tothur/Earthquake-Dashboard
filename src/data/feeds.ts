@@ -25,3 +25,5 @@ export const FEEDS: FeedDefinition[] = [
 ];
 
 export const MIN_MAGNITUDE_OPTIONS = [0, 1, 2.5, 4, 5, 6, 7];
+
+export const MAJOR_MAGNITUDE_OPTIONS = [5, 5.5, 6, 6.5, 7, 7.5, 8];

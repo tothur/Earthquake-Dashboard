@@ -1,23 +1,27 @@
-import { RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { RadioTower, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import clsx from 'clsx';
-import { FEEDS, MIN_MAGNITUDE_OPTIONS } from '../data/feeds';
+import { FEEDS, MAJOR_MAGNITUDE_OPTIONS, MIN_MAGNITUDE_OPTIONS } from '../data/feeds';
 import type { FeedId } from '../types';
 
 interface FilterBarProps {
   selectedFeedId: FeedId;
   minimumMagnitude: number;
+  majorMagnitudeThreshold: number;
   isLoading: boolean;
   onFeedChange: (feedId: FeedId) => void;
   onMinimumMagnitudeChange: (value: number) => void;
+  onMajorMagnitudeThresholdChange: (value: number) => void;
   onRefresh: () => void;
 }
 
 export function FilterBar({
   selectedFeedId,
   minimumMagnitude,
+  majorMagnitudeThreshold,
   isLoading,
   onFeedChange,
   onMinimumMagnitudeChange,
+  onMajorMagnitudeThresholdChange,
   onRefresh,
 }: FilterBarProps) {
   return (
@@ -58,6 +62,23 @@ export function FilterBar({
             {MIN_MAGNITUDE_OPTIONS.map((option) => (
               <option key={option} value={option} className="bg-ink-900 text-white">
                 {option === 0 ? 'All' : `M ${option}+`}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="inline-flex h-10 items-center gap-2 rounded-[8px] border border-white/10 bg-ink-900/80 px-3 text-sm text-slate-300">
+          <RadioTower size={16} className="text-slate-400" aria-hidden="true" />
+          <span className="font-medium">Watch threshold</span>
+          <select
+            value={majorMagnitudeThreshold}
+            onChange={(event) => onMajorMagnitudeThresholdChange(Number(event.target.value))}
+            className="bg-transparent font-semibold text-white outline-none"
+            aria-label="Major watch threshold"
+          >
+            {MAJOR_MAGNITUDE_OPTIONS.map((option) => (
+              <option key={option} value={option} className="bg-ink-900 text-white">
+                M {option.toFixed(1)}+
               </option>
             ))}
           </select>

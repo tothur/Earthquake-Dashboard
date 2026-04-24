@@ -6,10 +6,13 @@ import { magnitudeTone } from '../utils/earthquakes';
 interface MajorQuakeHighlightProps {
   quake: Earthquake | null;
   feedLabel: string;
+  magnitudeThreshold: number;
   isLoading: boolean;
 }
 
-export function MajorQuakeHighlight({ quake, feedLabel, isLoading }: MajorQuakeHighlightProps) {
+export function MajorQuakeHighlight({ quake, feedLabel, magnitudeThreshold, isLoading }: MajorQuakeHighlightProps) {
+  const thresholdLabel = `M ${magnitudeThreshold.toFixed(1)}+`;
+
   if (isLoading) {
     return (
       <section className="rounded-[8px] border border-white/10 bg-white/[0.045] p-5 shadow-panel">
@@ -35,14 +38,16 @@ export function MajorQuakeHighlight({ quake, feedLabel, isLoading }: MajorQuakeH
               <RadioTower size={16} aria-hidden="true" />
               Major earthquake watch
             </div>
-            <h2 className="mt-4 text-xl font-semibold text-white">No magnitude 7+ earthquake is currently listed.</h2>
+            <h2 className="mt-4 text-xl font-semibold text-white">
+              No {thresholdLabel} earthquake is currently listed.
+            </h2>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-400">
-              The selected USGS feed for {feedLabel.toLocaleLowerCase()} does not currently include a magnitude 7.0
-              or higher earthquake.
+              The selected USGS feed for {feedLabel.toLocaleLowerCase()} does not currently include an earthquake at
+              or above the active monitoring threshold.
             </p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300">
-            Monitoring threshold: <span className="font-semibold text-white">M 7.0+</span>
+            Monitoring threshold: <span className="font-semibold text-white">{thresholdLabel}</span>
           </div>
         </div>
       </section>
@@ -55,7 +60,7 @@ export function MajorQuakeHighlight({ quake, feedLabel, isLoading }: MajorQuakeH
     <section className="rounded-[8px] border border-signal-amber/25 bg-[linear-gradient(135deg,rgba(246,182,95,0.16),rgba(184,108,255,0.10),rgba(255,255,255,0.045))] p-5 shadow-glow">
       <div className="flex items-center gap-2 text-sm font-semibold text-signal-amber">
         <AlertTriangle size={17} aria-hidden="true" />
-        Largest magnitude 7+ event in {feedLabel.toLocaleLowerCase()}
+        Largest {thresholdLabel} event in {feedLabel.toLocaleLowerCase()}
       </div>
 
       <div className="mt-5 grid gap-5 md:grid-cols-[170px_minmax(0,1fr)] md:items-center">

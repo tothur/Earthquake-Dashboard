@@ -1,5 +1,10 @@
 import type { Earthquake, SortState, UsgsFeature, UsgsFeatureCollection } from '../types';
 
+const HUNGARY_CENTER = {
+  latitude: 47.1625,
+  longitude: 19.5033,
+};
+
 const isFiniteNumber = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value);
 
@@ -81,12 +86,54 @@ export function getMostRecent(quakes: Earthquake[]): Earthquake | null {
   }, null);
 }
 
-export function getLargestM7Plus(quakes: Earthquake[]): Earthquake | null {
-  return getStrongest(quakes.filter((quake) => (quake.magnitude ?? 0) >= 7));
+export function getLargestAtLeast(quakes: Earthquake[], magnitudeThreshold: number): Earthquake | null {
+  return getStrongest(quakes.filter((quake) => (quake.magnitude ?? 0) >= magnitudeThreshold));
 }
 
 export function countAtLeast(quakes: Earthquake[], magnitude: number): number {
   return quakes.filter((quake) => (quake.magnitude ?? Number.NEGATIVE_INFINITY) >= magnitude).length;
+}
+
+export function getClosestToHungary(
+  quakes: Earthquake[],
+): { quake: Earthquake; distanceKm: number } | null {
+  return quakes.reduce<{ quake: Earthquake; distanceKm: number } | null>((closest, quake) => {
+    const distanceKm = distanceBetweenKm(
+      HUNGARY_CENTER.latitude,
+      HUNGARY_CENTER.longitude,
+      quake.latitude,
+      quake.longitude,
+    );
+
+    if (!closest || distanceKm < closest.distanceKm) {
+      return { quake, distanceKm };
+    }
+
+    return closest;
+  }, null);
+}
+
+function distanceBetweenKm(
+  latitudeA: number,
+  longitudeA: number,
+  latitudeB: number,
+  longitudeB: number,
+): number {
+  const earthRadiusKm = 6371;
+  const latitudeDelta = toRadians(latitudeB - latitudeA);
+  const longitudeDelta = toRadians(longitudeB - longitudeA);
+  const startLatitude = toRadians(latitudeA);
+  const endLatitude = toRadians(latitudeB);
+
+  const haversine =
+    Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+
+  return 2 * earthRadiusKm * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function toRadians(degrees: number): number {
+  return (degrees * Math.PI) / 180;
 }
 
 export function sortEarthquakes(quakes: Earthquake[], sortState: SortState): Earthquake[] {
