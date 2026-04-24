@@ -45,6 +45,7 @@ function App() {
   const [minimumMagnitude, setMinimumMagnitude] = useState(0);
   const [refreshToken, setRefreshToken] = useState(0);
   const [sortState, setSortState] = useState<SortState>({ key: 'time', direction: 'desc' });
+  const [isRecentListOpen, setIsRecentListOpen] = useState(false);
   const [feedState, setFeedState] = useState<FeedState>({
     status: 'idle',
     feedId: initialFeedId,
@@ -137,7 +138,7 @@ function App() {
   return (
     <div className="min-h-screen bg-ink-950 text-slate-100">
       <div className="mx-auto flex w-full max-w-[1480px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+        <header>
           <div className="max-w-4xl">
             <div className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.05] px-3 py-1 text-sm font-semibold text-signal-green">
               <Globe2 size={16} aria-hidden="true" />
@@ -148,24 +149,6 @@ function App() {
               Real-time global seismic monitoring using official USGS GeoJSON feeds, with magnitude-scaled map markers,
               live summary metrics, and sortable event detail.
             </p>
-          </div>
-
-          <div className="rounded-[8px] border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-slate-300 shadow-panel">
-            <div className="flex items-center gap-2 font-semibold text-white">
-              <DatabaseZap size={16} className="text-signal-green" aria-hidden="true" />
-              Feed status
-            </div>
-            <p className="mt-2">
-              {feedState.generatedAt ? `Generated ${formatDateTime(feedState.generatedAt)}` : 'Awaiting USGS data'}
-            </p>
-            <a
-              href={selectedFeed.url}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-2 inline-flex text-signal-green transition hover:text-white"
-            >
-              Open source feed
-            </a>
           </div>
         </header>
 
@@ -251,8 +234,33 @@ function App() {
           quakes={sortedQuakes}
           sortState={sortState}
           isLoading={isLoading && feedState.quakes.length === 0}
+          isOpen={isRecentListOpen}
+          onToggle={() => setIsRecentListOpen((isOpen) => !isOpen)}
           onSortChange={handleSortChange}
         />
+
+        <section className="rounded-[8px] border border-white/10 bg-white/[0.045] px-4 py-3 text-sm text-slate-300 shadow-panel">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2 font-semibold text-white">
+                <DatabaseZap size={16} className="text-signal-green" aria-hidden="true" />
+                Feed status
+              </div>
+              <p className="mt-2">
+                {feedState.generatedAt ? `Generated ${formatDateTime(feedState.generatedAt)}` : 'Awaiting USGS data'}
+              </p>
+              <p className="mt-1 text-slate-400">{feedState.sourceTitle || selectedFeed.description}</p>
+            </div>
+            <a
+              href={selectedFeed.url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex w-fit items-center rounded-[8px] border border-white/10 bg-white/[0.06] px-3 py-2 font-semibold text-signal-green transition hover:border-white/20 hover:bg-white/[0.1] hover:text-white"
+            >
+              Open source feed
+            </a>
+          </div>
+        </section>
 
         <footer className="pb-3 text-center text-xs text-slate-500">
           {feedState.sourceTitle || selectedFeed.description} Data is fetched directly in the browser from USGS.
