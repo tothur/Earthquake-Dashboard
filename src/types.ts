@@ -114,12 +114,22 @@ export interface TsunamiProduct {
   productName: string;
   headline: string;
   messageNumber: string | null;
+  earthquake: TsunamiProductEarthquake | null;
   earthquakeSummary: string | null;
   evaluation: string | null;
   threatForecast: string | null;
   recommendedAction: string | null;
   observation: string | null;
   sourceUrl: string;
+}
+
+export interface TsunamiProductEarthquake {
+  magnitude: number | null;
+  originTime: number | null;
+  latitude: number | null;
+  longitude: number | null;
+  depthKm: number | null;
+  location: string | null;
 }
 
 export interface NwsAlertFeatureCollection {

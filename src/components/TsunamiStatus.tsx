@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight, ExternalLink, PanelRightOpen, RadioTower, Waves } from 'lucide-react';
 import type { DashboardCopy } from '../i18n';
 import type { Earthquake, TsunamiAlert, TsunamiAlertLevel, TsunamiProduct } from '../types';
-import { formatDateTime, formatMagnitude, formatNumber } from '../utils/format';
+import { formatDateTime, formatDepth, formatMagnitude, formatNumber } from '../utils/format';
 import { TSUNAMI_WARNING_CENTER_URL } from '../utils/tsunami';
 
 interface TsunamiStatusProps {
@@ -55,6 +55,57 @@ function ProductSection({ label, value }: { label: string; value: string | null 
   );
 }
 
+function distanceBetweenKm(
+  latitudeA: number,
+  longitudeA: number,
+  latitudeB: number,
+  longitudeB: number,
+): number {
+  const earthRadiusKm = 6371;
+  const latitudeDelta = ((latitudeB - latitudeA) * Math.PI) / 180;
+  const longitudeDelta = ((longitudeB - longitudeA) * Math.PI) / 180;
+  const startLatitude = (latitudeA * Math.PI) / 180;
+  const endLatitude = (latitudeB * Math.PI) / 180;
+  const haversine =
+    Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+
+  return 2 * earthRadiusKm * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function findReferencedQuake(product: TsunamiProduct | null, quakes: Earthquake[]): Earthquake | null {
+  const earthquake = product?.earthquake;
+  if (!earthquake?.originTime || earthquake.latitude === null || earthquake.longitude === null) {
+    return null;
+  }
+
+  const candidates = quakes
+    .map((quake) => {
+      const timeDeltaHours = Math.abs(quake.time - earthquake.originTime!) / 3_600_000;
+      const distanceKm = distanceBetweenKm(
+        quake.latitude,
+        quake.longitude,
+        earthquake.latitude!,
+        earthquake.longitude!,
+      );
+      const magnitudeDelta =
+        quake.magnitude !== null && earthquake.magnitude !== null
+          ? Math.abs(quake.magnitude - earthquake.magnitude)
+          : 0;
+
+      return {
+        quake,
+        score: timeDeltaHours * 30 + distanceKm + magnitudeDelta * 60,
+        timeDeltaHours,
+        distanceKm,
+      };
+    })
+    .filter((candidate) => candidate.timeDeltaHours <= 12 && candidate.distanceKm <= 350)
+    .sort((first, second) => first.score - second.score);
+
+  return candidates[0]?.quake ?? null;
+}
+
 export function TsunamiStatus({
   quakes,
   alerts,
@@ -71,6 +122,8 @@ export function TsunamiStatus({
   const hasFlaggedEvents = flaggedQuakes.length > 0;
   const hasActiveAlerts = alerts.length > 0;
   const latestProduct = products[0] ?? null;
+  const referencedEarthquake = latestProduct?.earthquake ?? null;
+  const referencedQuake = findReferencedQuake(latestProduct, quakes);
   const flaggedCountLabel = formatNumber(flaggedQuakes.length, copy.locale);
 
   if (isLoading || (status === 'loading' && products.length === 0)) {
@@ -123,6 +176,36 @@ export function TsunamiStatus({
 
       {latestProduct && (
         <div className="mt-4 rounded-[8px] border border-white/10 bg-ink-900/55 p-3">
+          {referencedEarthquake && (
+            <div className="mb-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {copy.tsunami.referencedEarthquake}
+              </p>
+              <button
+                type="button"
+                onClick={() => referencedQuake && onQuakeSelect(referencedQuake)}
+                disabled={!referencedQuake}
+                className="flex w-full min-w-0 items-center justify-between gap-3 rounded-[8px] border border-white/10 bg-white/[0.045] px-3 py-2 text-left transition hover:border-signal-orange/40 hover:bg-white/[0.08] disabled:cursor-default disabled:hover:border-white/10 disabled:hover:bg-white/[0.045]"
+                aria-label={copy.tsunami.openReferencedEarthquake}
+                title={referencedQuake ? copy.tsunami.openReferencedEarthquake : copy.tsunami.referencedUnavailable}
+              >
+                <span className="min-w-0">
+                  <span className="block truncate text-sm font-semibold text-white">
+                    {referencedQuake?.place ?? referencedEarthquake.location ?? copy.notAvailable}
+                  </span>
+                  <span className="mt-1 block text-xs text-slate-400">
+                    {formatMagnitude(referencedEarthquake.magnitude, copy.locale, copy.pendingMagnitude)}
+                    {referencedEarthquake.originTime ? ` · ${formatDateTime(referencedEarthquake.originTime, copy.locale)}` : ''}
+                    {referencedEarthquake.depthKm !== null ? ` · ${formatDepth(referencedEarthquake.depthKm, copy.locale)}` : ''}
+                  </span>
+                </span>
+                <span className="shrink-0 text-xs font-semibold text-slate-500">
+                  {referencedQuake ? <PanelRightOpen size={15} className="text-signal-orange" aria-hidden="true" /> : copy.tsunami.referencedUnavailable}
+                </span>
+              </button>
+            </div>
+          )}
+
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.tsunami.headline}</p>

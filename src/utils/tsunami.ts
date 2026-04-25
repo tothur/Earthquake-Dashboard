@@ -6,6 +6,7 @@ import type {
   TsunamiAlert,
   TsunamiAlertLevel,
   TsunamiProduct,
+  TsunamiProductEarthquake,
 } from '../types';
 
 const NWS_TSUNAMI_ALERT_URL =
@@ -130,6 +131,54 @@ function extractObservation(productText: string): string | null {
   return observationLine ? cleanProductLine(observationLine) : null;
 }
 
+function parseNoaaTime(value: string): number | null {
+  const match = value.match(/(\d{2})(\d{2})\s+UTC\s+([A-Z]{3})\s+(\d{1,2})\s+(\d{4})/i);
+  if (!match) {
+    return null;
+  }
+
+  const month = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'].indexOf(
+    match[3].toUpperCase(),
+  );
+
+  if (month === -1) {
+    return null;
+  }
+
+  return Date.UTC(Number(match[5]), month, Number(match[4]), Number(match[1]), Number(match[2]));
+}
+
+function parseHemisphereCoordinate(value: string, negativeHemisphere: string): number {
+  const [amount, hemisphere] = value.trim().split(/\s+/);
+  const parsedAmount = Number(amount);
+  return hemisphere.toUpperCase().startsWith(negativeHemisphere) ? -parsedAmount : parsedAmount;
+}
+
+function parseProductEarthquake(productText: string): TsunamiProductEarthquake | null {
+  const items = extractSectionItems(productText, 'PRELIMINARY EARTHQUAKE PARAMETERS');
+  if (items.length === 0) {
+    return null;
+  }
+
+  const findValue = (label: string) => {
+    const item = items.find((line) => line.toUpperCase().startsWith(label));
+    return item?.replace(new RegExp(`^${label}\\s*`, 'i'), '').trim() ?? null;
+  };
+
+  const magnitude = Number(findValue('MAGNITUDE') ?? Number.NaN);
+  const coordinates = findValue('COORDINATES')?.match(/([\d.]+\s+(?:NORTH|SOUTH))\s+([\d.]+\s+(?:EAST|WEST))/i);
+  const depthKm = findValue('DEPTH')?.match(/([\d.]+)\s*KM/i)?.[1];
+
+  return {
+    magnitude: Number.isFinite(magnitude) ? magnitude : null,
+    originTime: findValue('ORIGIN TIME') ? parseNoaaTime(findValue('ORIGIN TIME') ?? '') : null,
+    latitude: coordinates ? parseHemisphereCoordinate(coordinates[1], 'S') : null,
+    longitude: coordinates ? parseHemisphereCoordinate(coordinates[2], 'W') : null,
+    depthKm: depthKm ? Number(depthKm) : null,
+    location: findValue('LOCATION'),
+  };
+}
+
 function parseProductDetail(detail: NwsProductDetail): TsunamiProduct {
   const productText = detail.productText ?? '';
   const earthquakeItems = extractSectionItems(productText, 'PRELIMINARY EARTHQUAKE PARAMETERS');
@@ -145,6 +194,7 @@ function parseProductDetail(detail: NwsProductDetail): TsunamiProduct {
     productName: detail.productName ?? 'Tsunami product',
     headline: extractHeadline(productText, detail.productName ?? 'Tsunami product'),
     messageNumber: extractMessageNumber(productText),
+    earthquake: parseProductEarthquake(productText),
     earthquakeSummary: earthquakeItems.slice(0, 4).join(' • ') || null,
     evaluation: evaluationItems.slice(0, 2).join(' ') || null,
     threatForecast: threatItems[0] ?? null,

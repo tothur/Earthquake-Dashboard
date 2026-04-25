@@ -125,6 +125,9 @@ export interface DashboardCopy {
   tsunami: {
     title: string;
     bulletinTitle: string;
+    referencedEarthquake: string;
+    openReferencedEarthquake: string;
+    referencedUnavailable: string;
     productEmptyTitle: string;
     productEmptyBody: string;
     bulletinDetails: string;
@@ -344,7 +347,10 @@ export const COPY: Record<Language, DashboardCopy> = {
     },
     tsunami: {
       title: 'Tsunami information',
-      bulletinTitle: 'NOAA tsunami bulletin',
+      bulletinTitle: 'NOAA Tsunami Bulletin',
+      referencedEarthquake: 'Referenced earthquake',
+      openReferencedEarthquake: 'Open referenced earthquake details',
+      referencedUnavailable: 'Not listed in the selected USGS feed',
       productEmptyTitle: 'No recent NOAA tsunami product returned',
       productEmptyBody:
         'The NOAA/NWS tsunami product feed did not return a recent watch, warning, advisory, or information statement.',
@@ -581,6 +587,9 @@ export const COPY: Record<Language, DashboardCopy> = {
     tsunami: {
       title: 'Cunamival kapcsolatos információ',
       bulletinTitle: 'NOAA cunami-közlemény',
+      referencedEarthquake: 'Kapcsolódó földrengés',
+      openReferencedEarthquake: 'Kapcsolódó földrengés részleteinek megnyitása',
+      referencedUnavailable: 'Nincs benne a kiválasztott USGS-adatfolyamban',
       productEmptyTitle: 'Nincs friss NOAA cunamitermék',
       productEmptyBody:
         'A NOAA/NWS cunami-termékadatfolyama nem adott vissza friss figyelmeztetést, riasztást, tanácsadást vagy tájékoztatót.',
