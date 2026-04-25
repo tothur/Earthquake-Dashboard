@@ -23,7 +23,15 @@ import { MagnitudeDistribution } from './components/MagnitudeDistribution';
 import { MajorQuakeHighlight } from './components/MajorQuakeHighlight';
 import { StatCard } from './components/StatCard';
 import { TsunamiStatus } from './components/TsunamiStatus';
-import type { Earthquake, FeedId, SortKey, SortState, TsunamiAlert, UsgsFeatureCollection } from './types';
+import type {
+  Earthquake,
+  FeedId,
+  SortKey,
+  SortState,
+  TsunamiAlert,
+  TsunamiProduct,
+  UsgsFeatureCollection,
+} from './types';
 import { COPY, type Language } from './i18n';
 import {
   applyMinimumMagnitude,
@@ -36,7 +44,7 @@ import {
   sortEarthquakes,
 } from './utils/earthquakes';
 import { formatDateTime, formatMagnitude, formatNumber, formatRelativeTime } from './utils/format';
-import { fetchTsunamiAlerts, TSUNAMI_ALERT_SOURCE_URL } from './utils/tsunami';
+import { fetchTsunamiInfo, TSUNAMI_ALERT_SOURCE_URL } from './utils/tsunami';
 
 type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 type ThemeMode = 'auto' | 'light' | 'dark';
@@ -50,10 +58,10 @@ interface FeedState {
   error: string | null;
 }
 
-interface TsunamiAlertState {
+interface TsunamiState {
   status: LoadStatus;
   alerts: TsunamiAlert[];
-  updatedAt: number | null;
+  products: TsunamiProduct[];
   error: string | null;
 }
 
@@ -80,10 +88,10 @@ function App() {
     sourceTitle: '',
     error: null,
   });
-  const [tsunamiAlertState, setTsunamiAlertState] = useState<TsunamiAlertState>({
+  const [tsunamiState, setTsunamiState] = useState<TsunamiState>({
     status: 'idle',
     alerts: [],
-    updatedAt: null,
+    products: [],
     error: null,
   });
 
@@ -168,20 +176,20 @@ function App() {
   useEffect(() => {
     const controller = new AbortController();
 
-    setTsunamiAlertState((current) => ({
+    setTsunamiState((current) => ({
       ...current,
       status: 'loading',
       error: null,
     }));
 
-    async function loadTsunamiAlerts() {
+    async function loadTsunamiInfo() {
       try {
-        const result = await fetchTsunamiAlerts(controller.signal);
+        const result = await fetchTsunamiInfo(controller.signal);
 
-        setTsunamiAlertState({
+        setTsunamiState({
           status: 'success',
           alerts: result.alerts,
-          updatedAt: result.updatedAt,
+          products: result.products,
           error: null,
         });
       } catch (error) {
@@ -189,7 +197,7 @@ function App() {
           return;
         }
 
-        setTsunamiAlertState((current) => ({
+        setTsunamiState((current) => ({
           ...current,
           status: 'error',
           error: error instanceof Error ? error.message : copy.tsunami.alertFeedFallback,
@@ -197,7 +205,7 @@ function App() {
       }
     }
 
-    loadTsunamiAlerts();
+    loadTsunamiInfo();
 
     return () => controller.abort();
   }, [copy.tsunami.alertFeedFallback, refreshToken]);
@@ -372,10 +380,10 @@ function App() {
 
         <TsunamiStatus
           quakes={feedState.quakes}
-          alerts={tsunamiAlertState.alerts}
-          alertStatus={tsunamiAlertState.status}
-          alertUpdatedAt={tsunamiAlertState.updatedAt}
-          alertError={tsunamiAlertState.error}
+          alerts={tsunamiState.alerts}
+          products={tsunamiState.products}
+          status={tsunamiState.status}
+          error={tsunamiState.error}
           feedLabel={selectedFeedLabel}
           copy={copy}
           isLoading={isLoading && feedState.quakes.length === 0}
@@ -447,7 +455,7 @@ function App() {
         <div ref={mapSectionRef}>
           <EarthquakeMap
             quakes={filteredQuakes}
-            tsunamiAlerts={tsunamiAlertState.alerts}
+            tsunamiAlerts={tsunamiState.alerts}
             selectedQuake={selectedQuake}
             copy={copy}
             theme={resolvedTheme}

@@ -6,7 +6,7 @@ A single-page, production-ready earthquake monitoring dashboard built with Vite,
 
 - Interactive global Leaflet map with magnitude-scaled clustered markers.
 - Toggleable tectonic context overlay with PB2002 plate boundaries and subduction zones.
-- NOAA/NWS active tsunami alert panel with optional map polygons when official alert geometry is available.
+- NOAA/NWS tsunami-center products with parsed threat, evaluation, action, and observation details, plus optional active-alert map polygons when available.
 - Event detail side panel with USGS metadata, coordinates, depth, status, and alert information.
 - Past hour, past day, and past week feed selector.
 - Minimum magnitude filter.
@@ -31,7 +31,8 @@ The tectonic context layer uses a bundled static copy of the PB2002 plate-bounda
 Tsunami information uses two levels of context:
 
 - The USGS earthquake `tsunami` event flag from the selected GeoJSON feed.
-- Active NOAA/NWS tsunami products from `https://api.weather.gov/alerts/active?event=Tsunami%20Warning,Tsunami%20Advisory,Tsunami%20Watch,Tsunami%20Information%20Statement&status=actual`.
+- Recent NOAA/NWS tsunami-center products from `https://api.weather.gov/products/types/TSU`.
+- Active NOAA/NWS tsunami alert polygons, when available, from `https://api.weather.gov/alerts/active?event=Tsunami%20Warning,Tsunami%20Advisory,Tsunami%20Watch,Tsunami%20Information%20Statement&status=actual`.
 
 The dashboard links back to `https://www.tsunami.gov/` for official warning-center messages. It is a monitoring aid only and does not replace civil-protection instructions or official tsunami warning center guidance.
 

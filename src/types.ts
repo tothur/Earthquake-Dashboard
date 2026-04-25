@@ -106,6 +106,22 @@ export interface TsunamiAlert {
   geometry: Geometry | null;
 }
 
+export interface TsunamiProduct {
+  id: string;
+  wmoCollectiveId: string;
+  issuingOffice: string;
+  issuanceTime: string;
+  productName: string;
+  headline: string;
+  messageNumber: string | null;
+  earthquakeSummary: string | null;
+  evaluation: string | null;
+  threatForecast: string | null;
+  recommendedAction: string | null;
+  observation: string | null;
+  sourceUrl: string;
+}
+
 export interface NwsAlertFeatureCollection {
   type: 'FeatureCollection';
   title?: string;
@@ -136,4 +152,22 @@ export interface NwsAlertFeature {
     instruction?: string | null;
     web?: string | null;
   };
+}
+
+export interface NwsProductCollection {
+  '@graph': NwsProductSummary[];
+}
+
+export interface NwsProductSummary {
+  '@id': string;
+  id: string;
+  wmoCollectiveId?: string;
+  issuingOffice?: string;
+  issuanceTime?: string;
+  productCode?: string;
+  productName?: string;
+}
+
+export interface NwsProductDetail extends NwsProductSummary {
+  productText?: string;
 }
