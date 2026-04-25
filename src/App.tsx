@@ -65,7 +65,7 @@ function App() {
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
   const [selectedFeedId, setSelectedFeedId] = useState<FeedId>(initialFeedId);
   const [minimumMagnitude, setMinimumMagnitude] = useState(0);
-  const [majorMagnitudeThreshold, setMajorMagnitudeThreshold] = useState(7);
+  const [majorMagnitudeThreshold, setMajorMagnitudeThreshold] = useState(6);
   const [mapFocus, setMapFocus] = useState<MapFocus>('global');
   const [refreshToken, setRefreshToken] = useState(0);
   const [sortState, setSortState] = useState<SortState>({ key: 'time', direction: 'desc' });
