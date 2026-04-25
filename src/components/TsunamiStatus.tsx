@@ -99,6 +99,39 @@ export function TsunamiStatus({
             {copy.tsunami.title}
           </div>
           <h2 className="mt-3 text-xl font-semibold text-white">{latestProduct ? copy.tsunami.bulletinTitle : copy.tsunami.productEmptyTitle}</h2>
+          {referencedEarthquake && (
+            <div className="mt-3 max-w-4xl">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-signal-orange">
+                {copy.tsunami.referencedEarthquake}
+              </p>
+              <button
+                type="button"
+                onClick={() => referencedQuake && onQuakeSelect(referencedQuake)}
+                disabled={!referencedQuake}
+                className="flex w-full min-w-0 items-center justify-between gap-3 rounded-[8px] border border-signal-orange/35 bg-signal-orange/10 px-3 py-3 text-left shadow-glow transition hover:border-signal-orange/55 hover:bg-signal-orange/15 disabled:cursor-default disabled:hover:border-signal-orange/35 disabled:hover:bg-signal-orange/10"
+                aria-label={copy.tsunami.openReferencedEarthquake}
+                title={referencedQuake ? copy.tsunami.openReferencedEarthquake : copy.tsunami.referencedUnavailable}
+              >
+                <span className="flex min-w-0 items-center gap-3">
+                  <span className="inline-flex h-12 min-w-12 shrink-0 items-center justify-center rounded-[8px] bg-signal-orange/20 px-2 text-lg font-semibold text-signal-orange">
+                    {formatMagnitude(referencedEarthquake.magnitude, copy.locale, copy.pendingMagnitude)}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block truncate text-base font-semibold text-white">
+                      {referencedQuake?.place ?? referencedEarthquake.location ?? copy.notAvailable}
+                    </span>
+                    <span className="mt-1 block text-xs text-slate-300">
+                      {referencedEarthquake.originTime ? formatDateTime(referencedEarthquake.originTime, copy.locale) : copy.notAvailable}
+                      {referencedEarthquake.depthKm !== null ? ` · ${formatDepth(referencedEarthquake.depthKm, copy.locale)}` : ''}
+                    </span>
+                  </span>
+                </span>
+                <span className="shrink-0 text-xs font-semibold text-slate-300">
+                  {referencedQuake ? <PanelRightOpen size={18} className="text-signal-orange" aria-hidden="true" /> : copy.tsunami.referencedUnavailable}
+                </span>
+              </button>
+            </div>
+          )}
           <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-400">
             {latestProduct?.threatForecast ?? latestProduct?.evaluation ?? copy.tsunami.productEmptyBody}
           </p>
@@ -125,36 +158,6 @@ export function TsunamiStatus({
 
       {latestProduct && (
         <div className="mt-4 rounded-[8px] border border-white/10 bg-ink-900/55 p-3">
-          {referencedEarthquake && (
-            <div className="mb-3">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {copy.tsunami.referencedEarthquake}
-              </p>
-              <button
-                type="button"
-                onClick={() => referencedQuake && onQuakeSelect(referencedQuake)}
-                disabled={!referencedQuake}
-                className="flex w-full min-w-0 items-center justify-between gap-3 rounded-[8px] border border-white/10 bg-white/[0.045] px-3 py-2 text-left transition hover:border-signal-orange/40 hover:bg-white/[0.08] disabled:cursor-default disabled:hover:border-white/10 disabled:hover:bg-white/[0.045]"
-                aria-label={copy.tsunami.openReferencedEarthquake}
-                title={referencedQuake ? copy.tsunami.openReferencedEarthquake : copy.tsunami.referencedUnavailable}
-              >
-                <span className="min-w-0">
-                  <span className="block truncate text-sm font-semibold text-white">
-                    {referencedQuake?.place ?? referencedEarthquake.location ?? copy.notAvailable}
-                  </span>
-                  <span className="mt-1 block text-xs text-slate-400">
-                    {formatMagnitude(referencedEarthquake.magnitude, copy.locale, copy.pendingMagnitude)}
-                    {referencedEarthquake.originTime ? ` · ${formatDateTime(referencedEarthquake.originTime, copy.locale)}` : ''}
-                    {referencedEarthquake.depthKm !== null ? ` · ${formatDepth(referencedEarthquake.depthKm, copy.locale)}` : ''}
-                  </span>
-                </span>
-                <span className="shrink-0 text-xs font-semibold text-slate-500">
-                  {referencedQuake ? <PanelRightOpen size={15} className="text-signal-orange" aria-hidden="true" /> : copy.tsunami.referencedUnavailable}
-                </span>
-              </button>
-            </div>
-          )}
-
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.tsunami.headline}</p>
