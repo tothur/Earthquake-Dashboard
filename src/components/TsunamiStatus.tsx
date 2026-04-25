@@ -1,4 +1,5 @@
-import { ExternalLink, PanelRightOpen, RadioTower, Waves } from 'lucide-react';
+import { useState } from 'react';
+import { ChevronDown, ChevronRight, ExternalLink, PanelRightOpen, RadioTower, Waves } from 'lucide-react';
 import type { DashboardCopy } from '../i18n';
 import type { Earthquake, TsunamiAlert, TsunamiAlertLevel, TsunamiProduct } from '../types';
 import { formatDateTime, formatMagnitude, formatNumber } from '../utils/format';
@@ -65,6 +66,7 @@ export function TsunamiStatus({
   isLoading,
   onQuakeSelect,
 }: TsunamiStatusProps) {
+  const [isProductOpen, setIsProductOpen] = useState(false);
   const flaggedQuakes = quakes.filter((quake) => quake.tsunami);
   const hasFlaggedEvents = flaggedQuakes.length > 0;
   const hasActiveAlerts = alerts.length > 0;
@@ -94,9 +96,7 @@ export function TsunamiStatus({
             <Waves size={16} aria-hidden="true" />
             {copy.tsunami.title}
           </div>
-          <h2 className="mt-3 text-xl font-semibold text-white">
-            {latestProduct ? latestProduct.headline : copy.tsunami.productEmptyTitle}
-          </h2>
+          <h2 className="mt-3 text-xl font-semibold text-white">{latestProduct ? copy.tsunami.bulletinTitle : copy.tsunami.productEmptyTitle}</h2>
           <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-400">
             {latestProduct?.threatForecast ?? latestProduct?.evaluation ?? copy.tsunami.productEmptyBody}
           </p>
@@ -122,60 +122,56 @@ export function TsunamiStatus({
       )}
 
       {latestProduct && (
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold text-white">{copy.tsunami.latestProduct}</p>
-              <p className="mt-1 text-xs text-slate-500">{latestProduct.productName}</p>
+        <div className="mt-4 rounded-[8px] border border-white/10 bg-ink-900/55 p-3">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.tsunami.headline}</p>
+              <p className="mt-1 text-sm font-semibold leading-5 text-white">{latestProduct.headline}</p>
+              <p className="mt-1 text-xs text-slate-500">
+                {formatDateTime(Date.parse(latestProduct.issuanceTime), copy.locale)} · {latestProduct.issuingOffice} ·{' '}
+                {latestProduct.messageNumber ?? latestProduct.wmoCollectiveId}
+              </p>
             </div>
-            <div className="grid gap-2 text-sm sm:grid-cols-3 lg:min-w-[520px]">
-              <ProductMetric label={copy.tsunami.issued} value={formatDateTime(Date.parse(latestProduct.issuanceTime), copy.locale)} />
-              <ProductMetric label={copy.tsunami.sourceOffice} value={latestProduct.issuingOffice} />
-              <ProductMetric label={copy.tsunami.messageNumber} value={latestProduct.messageNumber ?? latestProduct.wmoCollectiveId} />
-            </div>
-          </div>
 
-          <div className="mt-3 grid gap-3 lg:grid-cols-2">
-            <ProductSection label={copy.tsunami.earthquake} value={latestProduct.earthquakeSummary} />
-            <ProductSection label={copy.tsunami.evaluation} value={latestProduct.evaluation} />
-            <ProductSection label={copy.tsunami.threatForecast} value={latestProduct.threatForecast} />
-            <ProductSection label={copy.tsunami.recommendedActions} value={latestProduct.recommendedAction} />
-            <ProductSection label={copy.tsunami.observedWave} value={latestProduct.observation} />
-          </div>
-
-          <div className="mt-3">
-            <a
-              href={latestProduct.sourceUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex h-9 items-center gap-2 rounded-[8px] border border-signal-green/30 bg-signal-green/15 px-3 text-sm font-semibold text-signal-green transition hover:border-signal-green/50 hover:bg-signal-green/20 hover:text-white"
-            >
-              {copy.tsunami.openProduct}
-              <ExternalLink size={14} aria-hidden="true" />
-            </a>
-          </div>
-        </div>
-      )}
-
-      {products.length > 1 && (
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <p className="text-sm font-semibold text-white">{copy.tsunami.recentProducts}</p>
-          <div className="mt-3 grid gap-2 lg:grid-cols-2">
-            {products.slice(1).map((product) => (
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setIsProductOpen((isOpen) => !isOpen)}
+                className="inline-flex h-9 items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.06] px-3 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.1]"
+                aria-expanded={isProductOpen}
+              >
+                {isProductOpen ? <ChevronDown size={15} aria-hidden="true" /> : <ChevronRight size={15} aria-hidden="true" />}
+                {isProductOpen ? copy.tsunami.hideDetails : copy.tsunami.showDetails}
+              </button>
               <a
-                key={product.id}
-                href={product.sourceUrl}
+                href={latestProduct.sourceUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="rounded-[8px] border border-white/10 bg-ink-900/70 px-3 py-3 text-left transition hover:border-white/20 hover:bg-white/[0.08]"
+                className="inline-flex h-9 items-center gap-2 rounded-[8px] border border-signal-green/30 bg-signal-green/15 px-3 text-sm font-semibold text-signal-green transition hover:border-signal-green/50 hover:bg-signal-green/20 hover:text-white"
               >
-                <span className="block text-sm font-semibold leading-5 text-white">{product.headline}</span>
-                <span className="mt-2 block text-xs text-slate-500">
-                  {formatDateTime(Date.parse(product.issuanceTime), copy.locale)} · {product.issuingOffice}
-                </span>
+                {copy.tsunami.openProduct}
+                <ExternalLink size={14} aria-hidden="true" />
               </a>
-            ))}
+            </div>
           </div>
+
+          {isProductOpen && (
+            <div className="mt-3 border-t border-white/10 pt-3">
+              <p className="mb-3 text-sm font-semibold text-white">{copy.tsunami.bulletinDetails}</p>
+              <div className="grid gap-2 text-sm sm:grid-cols-3">
+                <ProductMetric label={copy.tsunami.issued} value={formatDateTime(Date.parse(latestProduct.issuanceTime), copy.locale)} />
+                <ProductMetric label={copy.tsunami.sourceOffice} value={latestProduct.issuingOffice} />
+                <ProductMetric label={copy.tsunami.messageNumber} value={latestProduct.messageNumber ?? latestProduct.wmoCollectiveId} />
+              </div>
+              <div className="mt-3 grid gap-3 lg:grid-cols-2">
+                <ProductSection label={copy.tsunami.earthquake} value={latestProduct.earthquakeSummary} />
+                <ProductSection label={copy.tsunami.evaluation} value={latestProduct.evaluation} />
+                <ProductSection label={copy.tsunami.threatForecast} value={latestProduct.threatForecast} />
+                <ProductSection label={copy.tsunami.recommendedActions} value={latestProduct.recommendedAction} />
+                <ProductSection label={copy.tsunami.observedWave} value={latestProduct.observation} />
+              </div>
+            </div>
+          )}
         </div>
       )}
 

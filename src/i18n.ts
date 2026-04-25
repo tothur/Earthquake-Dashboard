@@ -124,10 +124,13 @@ export interface DashboardCopy {
   };
   tsunami: {
     title: string;
+    bulletinTitle: string;
     productEmptyTitle: string;
     productEmptyBody: string;
-    latestProduct: string;
-    recentProducts: string;
+    bulletinDetails: string;
+    showDetails: string;
+    hideDetails: string;
+    headline: string;
     issued: string;
     sourceOffice: string;
     messageNumber: string;
@@ -341,11 +344,14 @@ export const COPY: Record<Language, DashboardCopy> = {
     },
     tsunami: {
       title: 'Tsunami information',
+      bulletinTitle: 'NOAA tsunami bulletin',
       productEmptyTitle: 'No recent NOAA tsunami product returned',
       productEmptyBody:
         'The NOAA/NWS tsunami product feed did not return a recent watch, warning, advisory, or information statement.',
-      latestProduct: 'Latest NOAA tsunami product',
-      recentProducts: 'Recent NOAA tsunami products',
+      bulletinDetails: 'NOAA bulletin details',
+      showDetails: 'Show details',
+      hideDetails: 'Hide details',
+      headline: 'NOAA headline',
       issued: 'Issued',
       sourceOffice: 'Source office',
       messageNumber: 'Message',
@@ -574,11 +580,14 @@ export const COPY: Record<Language, DashboardCopy> = {
     },
     tsunami: {
       title: 'Cunamival kapcsolatos információ',
+      bulletinTitle: 'NOAA cunami-közlemény',
       productEmptyTitle: 'Nincs friss NOAA cunamitermék',
       productEmptyBody:
         'A NOAA/NWS cunami-termékadatfolyama nem adott vissza friss figyelmeztetést, riasztást, tanácsadást vagy tájékoztatót.',
-      latestProduct: 'Legfrissebb NOAA cunamitermék',
-      recentProducts: 'Friss NOAA cunamitermékek',
+      bulletinDetails: 'NOAA-közlemény részletei',
+      showDetails: 'Részletek mutatása',
+      hideDetails: 'Részletek elrejtése',
+      headline: 'NOAA címsor',
       issued: 'Kiadva',
       sourceOffice: 'Kiadó központ',
       messageNumber: 'Üzenet',
