@@ -1,4 +1,5 @@
 import type {
+  Earthquake,
   NwsAlertFeatureCollection,
   NwsProductCollection,
   NwsProductDetail,
@@ -7,7 +8,9 @@ import type {
   TsunamiAlertLevel,
   TsunamiProduct,
   TsunamiProductEarthquake,
+  UsgsFeatureCollection,
 } from '../types';
+import { parseEarthquakes } from './earthquakes';
 
 const NWS_TSUNAMI_ALERT_URL =
   'https://api.weather.gov/alerts/active?event=Tsunami%20Warning,Tsunami%20Advisory,Tsunami%20Watch,Tsunami%20Information%20Statement&status=actual';
@@ -195,6 +198,7 @@ function parseProductDetail(detail: NwsProductDetail): TsunamiProduct {
     headline: extractHeadline(productText, detail.productName ?? 'Tsunami product'),
     messageNumber: extractMessageNumber(productText),
     earthquake: parseProductEarthquake(productText),
+    referencedQuake: null,
     earthquakeSummary: earthquakeItems.slice(0, 4).join(' • ') || null,
     evaluation: evaluationItems.slice(0, 2).join(' ') || null,
     threatForecast: threatItems[0] ?? null,
@@ -202,6 +206,70 @@ function parseProductDetail(detail: NwsProductDetail): TsunamiProduct {
     observation: extractObservation(productText),
     sourceUrl: `https://api.weather.gov/products/${detail.id}`,
   };
+}
+
+async function fetchReferencedUsgsQuake(
+  earthquake: TsunamiProductEarthquake | null,
+  signal: AbortSignal,
+): Promise<Earthquake | null> {
+  if (
+    !earthquake?.originTime ||
+    earthquake.latitude === null ||
+    earthquake.longitude === null ||
+    earthquake.magnitude === null
+  ) {
+    return null;
+  }
+
+  const startTime = new Date(earthquake.originTime - 45 * 60_000).toISOString();
+  const endTime = new Date(earthquake.originTime + 45 * 60_000).toISOString();
+  const params = new URLSearchParams({
+    format: 'geojson',
+    starttime: startTime,
+    endtime: endTime,
+    minmagnitude: String(Math.max(0, earthquake.magnitude - 1)),
+    latitude: String(earthquake.latitude),
+    longitude: String(earthquake.longitude),
+    maxradiuskm: '700',
+  });
+
+  const response = await fetch(`https://earthquake.usgs.gov/fdsnws/event/1/query?${params.toString()}`, {
+    signal,
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    return null;
+  }
+
+  const quakes = parseEarthquakes((await response.json()) as UsgsFeatureCollection);
+  return quakes
+    .map((quake) => ({
+      quake,
+      score:
+        Math.abs(quake.time - earthquake.originTime!) / 60_000 +
+        distanceBetweenKm(quake.latitude, quake.longitude, earthquake.latitude!, earthquake.longitude!) +
+        Math.abs((quake.magnitude ?? earthquake.magnitude!) - earthquake.magnitude!) * 60,
+    }))
+    .sort((first, second) => first.score - second.score)[0]?.quake ?? null;
+}
+
+function distanceBetweenKm(
+  latitudeA: number,
+  longitudeA: number,
+  latitudeB: number,
+  longitudeB: number,
+): number {
+  const earthRadiusKm = 6371;
+  const latitudeDelta = ((latitudeB - latitudeA) * Math.PI) / 180;
+  const longitudeDelta = ((longitudeB - longitudeA) * Math.PI) / 180;
+  const startLatitude = (latitudeA * Math.PI) / 180;
+  const endLatitude = (latitudeB * Math.PI) / 180;
+  const haversine =
+    Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+
+  return 2 * earthRadiusKm * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
 }
 
 async function fetchActiveTsunamiAlerts(signal: AbortSignal): Promise<TsunamiAlert[]> {
@@ -268,8 +336,15 @@ async function fetchRecentTsunamiProducts(signal: AbortSignal): Promise<TsunamiP
   const payload = (await response.json()) as NwsProductCollection;
   const summaries = (payload['@graph'] ?? []).slice(0, 3);
   const details = await Promise.all(summaries.map((summary) => fetchTsunamiProductDetail(summary, signal)));
+  const products = details.map(parseProductDetail);
+  const productsWithQuakes = await Promise.all(
+    products.map(async (product) => ({
+      ...product,
+      referencedQuake: await fetchReferencedUsgsQuake(product.earthquake, signal),
+    })),
+  );
 
-  return details.map(parseProductDetail).sort((first, second) => {
+  return productsWithQuakes.sort((first, second) => {
     const firstTime = parseTime(first.issuanceTime) ?? 0;
     const secondTime = parseTime(second.issuanceTime) ?? 0;
     return secondTime - firstTime;

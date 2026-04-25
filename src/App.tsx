@@ -79,6 +79,7 @@ function App() {
   const [sortState, setSortState] = useState<SortState>({ key: 'time', direction: 'desc' });
   const [isRecentListOpen, setIsRecentListOpen] = useState(false);
   const [selectedQuakeId, setSelectedQuakeId] = useState<string | null>(null);
+  const [selectedQuakeSnapshot, setSelectedQuakeSnapshot] = useState<Earthquake | null>(null);
   const mapSectionRef = useRef<HTMLDivElement | null>(null);
   const [feedState, setFeedState] = useState<FeedState>({
     status: 'idle',
@@ -228,8 +229,10 @@ function App() {
   );
   const closestToHungary = useMemo(() => getClosestToHungary(filteredQuakes), [filteredQuakes]);
   const selectedQuake = useMemo(
-    () => feedState.quakes.find((quake) => quake.id === selectedQuakeId) ?? null,
-    [feedState.quakes, selectedQuakeId],
+    () =>
+      feedState.quakes.find((quake) => quake.id === selectedQuakeId) ??
+      (selectedQuakeSnapshot?.id === selectedQuakeId ? selectedQuakeSnapshot : null),
+    [feedState.quakes, selectedQuakeId, selectedQuakeSnapshot],
   );
   const isLoading = feedState.status === 'loading';
 
@@ -251,10 +254,16 @@ function App() {
       return;
     }
 
+    setSelectedQuakeSnapshot(quake);
     setSelectedQuakeId(quake.id);
     window.requestAnimationFrame(() => {
       mapSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
+  }
+
+  function handleQuakeSelect(quake: Earthquake) {
+    setSelectedQuakeSnapshot(quake);
+    setSelectedQuakeId(quake.id);
   }
 
   return (
@@ -375,7 +384,7 @@ function App() {
           magnitudeThreshold={majorMagnitudeThreshold}
           copy={copy}
           isLoading={isLoading && feedState.quakes.length === 0}
-          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
+          onQuakeSelect={handleQuakeSelect}
         />
 
         <TsunamiStatus
@@ -387,7 +396,7 @@ function App() {
           feedLabel={selectedFeedLabel}
           copy={copy}
           isLoading={isLoading && feedState.quakes.length === 0}
-          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
+          onQuakeSelect={handleQuakeSelect}
         />
 
         <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -461,7 +470,7 @@ function App() {
             theme={resolvedTheme}
             focus={mapFocus}
             onFocusChange={setMapFocus}
-            onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
+            onQuakeSelect={handleQuakeSelect}
             isLoading={isLoading && feedState.quakes.length === 0}
           />
         </div>
@@ -474,7 +483,7 @@ function App() {
           isOpen={isRecentListOpen}
           onToggle={() => setIsRecentListOpen((isOpen) => !isOpen)}
           onSortChange={handleSortChange}
-          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
+          onQuakeSelect={handleQuakeSelect}
         />
 
         <footer className="flex flex-col items-center gap-2 pb-3 text-center text-xs text-slate-500">
@@ -495,7 +504,14 @@ function App() {
           </div>
         </footer>
       </div>
-      <EventDetailPanel quake={selectedQuake} copy={copy} onClose={() => setSelectedQuakeId(null)} />
+      <EventDetailPanel
+        quake={selectedQuake}
+        copy={copy}
+        onClose={() => {
+          setSelectedQuakeId(null);
+          setSelectedQuakeSnapshot(null);
+        }}
+      />
     </div>
   );
 }

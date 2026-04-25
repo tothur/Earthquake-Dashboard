@@ -55,57 +55,6 @@ function ProductSection({ label, value }: { label: string; value: string | null 
   );
 }
 
-function distanceBetweenKm(
-  latitudeA: number,
-  longitudeA: number,
-  latitudeB: number,
-  longitudeB: number,
-): number {
-  const earthRadiusKm = 6371;
-  const latitudeDelta = ((latitudeB - latitudeA) * Math.PI) / 180;
-  const longitudeDelta = ((longitudeB - longitudeA) * Math.PI) / 180;
-  const startLatitude = (latitudeA * Math.PI) / 180;
-  const endLatitude = (latitudeB * Math.PI) / 180;
-  const haversine =
-    Math.sin(latitudeDelta / 2) ** 2 +
-    Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2;
-
-  return 2 * earthRadiusKm * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
-}
-
-function findReferencedQuake(product: TsunamiProduct | null, quakes: Earthquake[]): Earthquake | null {
-  const earthquake = product?.earthquake;
-  if (!earthquake?.originTime || earthquake.latitude === null || earthquake.longitude === null) {
-    return null;
-  }
-
-  const candidates = quakes
-    .map((quake) => {
-      const timeDeltaHours = Math.abs(quake.time - earthquake.originTime!) / 3_600_000;
-      const distanceKm = distanceBetweenKm(
-        quake.latitude,
-        quake.longitude,
-        earthquake.latitude!,
-        earthquake.longitude!,
-      );
-      const magnitudeDelta =
-        quake.magnitude !== null && earthquake.magnitude !== null
-          ? Math.abs(quake.magnitude - earthquake.magnitude)
-          : 0;
-
-      return {
-        quake,
-        score: timeDeltaHours * 30 + distanceKm + magnitudeDelta * 60,
-        timeDeltaHours,
-        distanceKm,
-      };
-    })
-    .filter((candidate) => candidate.timeDeltaHours <= 12 && candidate.distanceKm <= 350)
-    .sort((first, second) => first.score - second.score);
-
-  return candidates[0]?.quake ?? null;
-}
-
 export function TsunamiStatus({
   quakes,
   alerts,
@@ -123,7 +72,7 @@ export function TsunamiStatus({
   const hasActiveAlerts = alerts.length > 0;
   const latestProduct = products[0] ?? null;
   const referencedEarthquake = latestProduct?.earthquake ?? null;
-  const referencedQuake = findReferencedQuake(latestProduct, quakes);
+  const referencedQuake = latestProduct?.referencedQuake ?? null;
   const flaggedCountLabel = formatNumber(flaggedQuakes.length, copy.locale);
 
   if (isLoading || (status === 'loading' && products.length === 0)) {

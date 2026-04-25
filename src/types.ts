@@ -115,6 +115,7 @@ export interface TsunamiProduct {
   headline: string;
   messageNumber: string | null;
   earthquake: TsunamiProductEarthquake | null;
+  referencedQuake: Earthquake | null;
   earthquakeSummary: string | null;
   evaluation: string | null;
   threatForecast: string | null;
