@@ -6,6 +6,8 @@ interface StatCardProps {
   detail: string;
   icon: LucideIcon;
   tone?: 'green' | 'amber' | 'orange' | 'red' | 'violet';
+  onClick?: () => void;
+  actionLabel?: string;
 }
 
 const toneClasses = {
@@ -16,9 +18,9 @@ const toneClasses = {
   violet: 'bg-signal-violet/15 text-signal-violet',
 };
 
-export function StatCard({ label, value, detail, icon: Icon, tone = 'green' }: StatCardProps) {
-  return (
-    <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-4 shadow-panel">
+export function StatCard({ label, value, detail, icon: Icon, tone = 'green', onClick, actionLabel }: StatCardProps) {
+  const content = (
+    <>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm font-medium text-slate-400">{label}</p>
@@ -29,6 +31,26 @@ export function StatCard({ label, value, detail, icon: Icon, tone = 'green' }: S
         </span>
       </div>
       <p className="mt-3 min-h-5 text-sm text-slate-400">{detail}</p>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className="rounded-[8px] border border-white/10 bg-white/[0.045] p-4 text-left shadow-panel transition hover:border-signal-orange/40 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-orange/70"
+        aria-label={actionLabel ?? label}
+        title={actionLabel ?? label}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-4 shadow-panel">
+      {content}
     </article>
   );
 }

@@ -61,6 +61,7 @@ export interface DashboardCopy {
     mostRecentEmpty: string;
     closestToHungary: string;
     closestEmpty: string;
+    closestAction: string;
     magnitude6: string;
     magnitude6Detail: string;
   };
@@ -271,6 +272,7 @@ export const COPY: Record<Language, DashboardCopy> = {
       mostRecentEmpty: 'No recent event in the current filter',
       closestToHungary: 'Closest to Hungary',
       closestEmpty: 'No event in the current filter',
+      closestAction: 'Open the closest earthquake to Hungary on the map',
       magnitude6: 'Magnitude 6+',
       magnitude6Detail: 'Events meeting or exceeding M 6.0',
     },
@@ -498,6 +500,7 @@ export const COPY: Record<Language, DashboardCopy> = {
       mostRecentEmpty: 'Nincs friss esemény az aktuális szűrésben',
       closestToHungary: 'Magyarországhoz legközelebb',
       closestEmpty: 'Nincs esemény az aktuális szűrésben',
+      closestAction: 'Magyarországhoz legközelebbi földrengés megnyitása a térképen',
       magnitude6: '6+ magnitúdó',
       magnitude6Detail: 'M 6,0 vagy annál erősebb események',
     },

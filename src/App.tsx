@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Activity,
   AlertTriangle,
@@ -71,6 +71,7 @@ function App() {
   const [sortState, setSortState] = useState<SortState>({ key: 'time', direction: 'desc' });
   const [isRecentListOpen, setIsRecentListOpen] = useState(false);
   const [selectedQuakeId, setSelectedQuakeId] = useState<string | null>(null);
+  const mapSectionRef = useRef<HTMLDivElement | null>(null);
   const [feedState, setFeedState] = useState<FeedState>({
     status: 'idle',
     feedId: initialFeedId,
@@ -235,6 +236,17 @@ function App() {
       key,
       direction: current.key === key && current.direction === 'desc' ? 'asc' : 'desc',
     }));
+  }
+
+  function handleClosestToHungarySelect() {
+    if (!closestToHungary) {
+      return;
+    }
+
+    setSelectedQuakeId(closestToHungary.quake.id);
+    window.requestAnimationFrame(() => {
+      mapSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   }
 
   return (
@@ -402,6 +414,8 @@ function App() {
                 : copy.stats.closestEmpty
             }
             tone="orange"
+            onClick={closestToHungary ? handleClosestToHungarySelect : undefined}
+            actionLabel={copy.stats.closestAction}
           />
           <StatCard
             icon={ShieldAlert}
@@ -426,16 +440,19 @@ function App() {
           />
         </section>
 
-        <EarthquakeMap
-          quakes={filteredQuakes}
-          tsunamiAlerts={tsunamiAlertState.alerts}
-          copy={copy}
-          theme={resolvedTheme}
-          focus={mapFocus}
-          onFocusChange={setMapFocus}
-          onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
-          isLoading={isLoading && feedState.quakes.length === 0}
-        />
+        <div ref={mapSectionRef}>
+          <EarthquakeMap
+            quakes={filteredQuakes}
+            tsunamiAlerts={tsunamiAlertState.alerts}
+            selectedQuake={selectedQuake}
+            copy={copy}
+            theme={resolvedTheme}
+            focus={mapFocus}
+            onFocusChange={setMapFocus}
+            onQuakeSelect={(quake) => setSelectedQuakeId(quake.id)}
+            isLoading={isLoading && feedState.quakes.length === 0}
+          />
+        </div>
 
         <EarthquakeTable
           quakes={sortedQuakes}

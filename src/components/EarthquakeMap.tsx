@@ -11,6 +11,7 @@ import type { DashboardCopy } from '../i18n';
 interface EarthquakeMapProps {
   quakes: Earthquake[];
   tsunamiAlerts: TsunamiAlert[];
+  selectedQuake: Earthquake | null;
   copy: DashboardCopy;
   theme: 'light' | 'dark';
   focus: MapFocus;
@@ -76,6 +77,23 @@ function FitBounds({ quakes, focus }: { quakes: Earthquake[]; focus: MapFocus })
       duration: 0.7,
     });
   }, [focus, map, quakes]);
+
+  return null;
+}
+
+function PanToSelectedQuake({ quake }: { quake: Earthquake | null }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!quake) {
+      return;
+    }
+
+    map.flyTo([quake.latitude, quake.longitude], Math.max(map.getZoom(), 6), {
+      animate: true,
+      duration: 0.75,
+    });
+  }, [map, quake]);
 
   return null;
 }
@@ -450,6 +468,7 @@ function ClusteredQuakeLayer({
 export function EarthquakeMap({
   quakes,
   tsunamiAlerts,
+  selectedQuake,
   copy,
   theme,
   focus,
@@ -583,6 +602,7 @@ export function EarthquakeMap({
           {showTectonicContext && <TectonicContextLayer theme={theme} />}
           {showTsunamiAlerts && <TsunamiAlertLayer alerts={tsunamiAlerts} copy={copy} theme={theme} />}
           <FitBounds quakes={quakes} focus={focus} />
+          <PanToSelectedQuake quake={selectedQuake} />
           <ClusteredQuakeLayer quakes={quakes} copy={copy} onQuakeSelect={onQuakeSelect} />
         </MapContainer>
 
