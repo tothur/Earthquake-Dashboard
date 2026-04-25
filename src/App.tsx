@@ -44,7 +44,7 @@ import {
   sortEarthquakes,
 } from './utils/earthquakes';
 import { formatDateTime, formatMagnitude, formatNumber, formatRelativeTime } from './utils/format';
-import { fetchTsunamiInfo, TSUNAMI_ALERT_SOURCE_URL } from './utils/tsunami';
+import { fetchReferencedUsgsQuake, fetchTsunamiInfo, TSUNAMI_ALERT_SOURCE_URL } from './utils/tsunami';
 
 type LoadStatus = 'idle' | 'loading' | 'success' | 'error';
 type ThemeMode = 'auto' | 'light' | 'dark';
@@ -210,6 +210,41 @@ function App() {
 
     return () => controller.abort();
   }, [copy.tsunami.alertFeedFallback, refreshToken]);
+
+  useEffect(() => {
+    const product = tsunamiState.products[0];
+
+    if (!product?.earthquake || product.referencedQuake) {
+      return;
+    }
+
+    const controller = new AbortController();
+
+    async function loadReferencedQuake() {
+      try {
+        const referencedQuake = await fetchReferencedUsgsQuake(product.earthquake, controller.signal);
+
+        if (controller.signal.aborted || !referencedQuake) {
+          return;
+        }
+
+        setTsunamiState((current) => ({
+          ...current,
+          products: current.products.map((currentProduct) =>
+            currentProduct.id === product.id ? { ...currentProduct, referencedQuake } : currentProduct,
+          ),
+        }));
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === 'AbortError')) {
+          return;
+        }
+      }
+    }
+
+    loadReferencedQuake();
+
+    return () => controller.abort();
+  }, [tsunamiState.products]);
 
   const filteredQuakes = useMemo(
     () => applyMinimumMagnitude(feedState.quakes, minimumMagnitude),

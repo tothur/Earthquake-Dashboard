@@ -208,7 +208,7 @@ function parseProductDetail(detail: NwsProductDetail): TsunamiProduct {
   };
 }
 
-async function fetchReferencedUsgsQuake(
+export async function fetchReferencedUsgsQuake(
   earthquake: TsunamiProductEarthquake | null,
   signal: AbortSignal,
 ): Promise<Earthquake | null> {
@@ -320,7 +320,7 @@ async function fetchActiveTsunamiAlerts(signal: AbortSignal): Promise<TsunamiAle
   });
 }
 
-async function fetchRecentTsunamiProducts(signal: AbortSignal): Promise<TsunamiProduct[]> {
+async function fetchLatestTsunamiProduct(signal: AbortSignal): Promise<TsunamiProduct[]> {
   const response = await fetch(NWS_TSUNAMI_PRODUCT_URL, {
     signal,
     cache: 'no-store',
@@ -334,21 +334,13 @@ async function fetchRecentTsunamiProducts(signal: AbortSignal): Promise<TsunamiP
   }
 
   const payload = (await response.json()) as NwsProductCollection;
-  const summaries = (payload['@graph'] ?? []).slice(0, 3);
-  const details = await Promise.all(summaries.map((summary) => fetchTsunamiProductDetail(summary, signal)));
-  const products = details.map(parseProductDetail);
-  const productsWithQuakes = await Promise.all(
-    products.map(async (product) => ({
-      ...product,
-      referencedQuake: await fetchReferencedUsgsQuake(product.earthquake, signal),
-    })),
-  );
+  const summary = payload['@graph']?.[0];
 
-  return productsWithQuakes.sort((first, second) => {
-    const firstTime = parseTime(first.issuanceTime) ?? 0;
-    const secondTime = parseTime(second.issuanceTime) ?? 0;
-    return secondTime - firstTime;
-  });
+  if (!summary) {
+    return [];
+  }
+
+  return [parseProductDetail(await fetchTsunamiProductDetail(summary, signal))];
 }
 
 async function fetchTsunamiProductDetail(summary: NwsProductSummary, signal: AbortSignal): Promise<NwsProductDetail> {
@@ -370,7 +362,7 @@ async function fetchTsunamiProductDetail(summary: NwsProductSummary, signal: Abo
 export async function fetchTsunamiInfo(signal: AbortSignal): Promise<TsunamiAlertLoadResult> {
   const [alertsResult, productsResult] = await Promise.allSettled([
     fetchActiveTsunamiAlerts(signal),
-    fetchRecentTsunamiProducts(signal),
+    fetchLatestTsunamiProduct(signal),
   ]);
 
   if (productsResult.status === 'rejected') {
