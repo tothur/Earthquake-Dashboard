@@ -57,8 +57,10 @@ export interface DashboardCopy {
     displayedDetail: (feedLabel: string, minimumMagnitude: number) => string;
     strongest: string;
     strongestEmpty: string;
+    strongestAction: string;
     mostRecent: string;
     mostRecentEmpty: string;
+    mostRecentAction: string;
     closestToHungary: string;
     closestEmpty: string;
     closestAction: string;
@@ -268,8 +270,10 @@ export const COPY: Record<Language, DashboardCopy> = {
         `${feedLabel}${minimumMagnitude > 0 ? `, M ${minimumMagnitude}+` : ', all magnitudes'}`,
       strongest: 'Strongest earthquake',
       strongestEmpty: 'No event in the current filter',
+      strongestAction: 'Open the strongest earthquake on the map',
       mostRecent: 'Most recent',
       mostRecentEmpty: 'No recent event in the current filter',
+      mostRecentAction: 'Open the most recent earthquake on the map',
       closestToHungary: 'Closest to Hungary',
       closestEmpty: 'No event in the current filter',
       closestAction: 'Open the closest earthquake to Hungary on the map',
@@ -496,8 +500,10 @@ export const COPY: Record<Language, DashboardCopy> = {
         `${feedLabel}${minimumMagnitude > 0 ? `, M ${minimumMagnitude}+` : ', minden magnitúdó'}`,
       strongest: 'Legerősebb rengés',
       strongestEmpty: 'Nincs esemény az aktuális szűrésben',
+      strongestAction: 'Legerősebb földrengés megnyitása a térképen',
       mostRecent: 'Legfrissebb',
       mostRecentEmpty: 'Nincs friss esemény az aktuális szűrésben',
+      mostRecentAction: 'Legfrissebb földrengés megnyitása a térképen',
       closestToHungary: 'Magyarországhoz legközelebb',
       closestEmpty: 'Nincs esemény az aktuális szűrésben',
       closestAction: 'Magyarországhoz legközelebbi földrengés megnyitása a térképen',

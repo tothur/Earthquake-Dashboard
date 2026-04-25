@@ -238,12 +238,12 @@ function App() {
     }));
   }
 
-  function handleClosestToHungarySelect() {
-    if (!closestToHungary) {
+  function handleStatQuakeSelect(quake: Earthquake | null | undefined) {
+    if (!quake) {
       return;
     }
 
-    setSelectedQuakeId(closestToHungary.quake.id);
+    setSelectedQuakeId(quake.id);
     window.requestAnimationFrame(() => {
       mapSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
@@ -396,6 +396,8 @@ function App() {
             value={strongest ? formatMagnitude(strongest.magnitude, copy.locale, copy.pendingMagnitude) : copy.notAvailable}
             detail={strongest ? strongest.place : copy.stats.strongestEmpty}
             tone="amber"
+            onClick={strongest ? () => handleStatQuakeSelect(strongest) : undefined}
+            actionLabel={copy.stats.strongestAction}
           />
           <StatCard
             icon={Clock3}
@@ -403,6 +405,8 @@ function App() {
             value={mostRecent ? formatRelativeTime(mostRecent.time, copy.locale) : copy.notAvailable}
             detail={mostRecent ? mostRecent.place : copy.stats.mostRecentEmpty}
             tone="violet"
+            onClick={mostRecent ? () => handleStatQuakeSelect(mostRecent) : undefined}
+            actionLabel={copy.stats.mostRecentAction}
           />
           <StatCard
             icon={MapPinned}
@@ -414,7 +418,7 @@ function App() {
                 : copy.stats.closestEmpty
             }
             tone="orange"
-            onClick={closestToHungary ? handleClosestToHungarySelect : undefined}
+            onClick={closestToHungary ? () => handleStatQuakeSelect(closestToHungary.quake) : undefined}
             actionLabel={copy.stats.closestAction}
           />
           <StatCard
