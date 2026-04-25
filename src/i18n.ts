@@ -134,6 +134,7 @@ export interface DashboardCopy {
     showDetails: string;
     hideDetails: string;
     headline: string;
+    threatStatus: string;
     issued: string;
     sourceOffice: string;
     messageNumber: string;
@@ -357,7 +358,8 @@ export const COPY: Record<Language, DashboardCopy> = {
       bulletinDetails: 'NOAA bulletin details',
       showDetails: 'Show details',
       hideDetails: 'Hide details',
-      headline: 'NOAA headline',
+      headline: 'U.S. Tsunami Warning System Threat Message',
+      threatStatus: 'Tsunami threat status',
       issued: 'Issued',
       sourceOffice: 'Source office',
       messageNumber: 'Message',
@@ -596,7 +598,8 @@ export const COPY: Record<Language, DashboardCopy> = {
       bulletinDetails: 'NOAA-közlemény részletei',
       showDetails: 'Részletek mutatása',
       hideDetails: 'Részletek elrejtése',
-      headline: 'NOAA címsor',
+      headline: 'U.S. Tsunami Warning System veszélyügyi közlemény',
+      threatStatus: 'Cunamiveszély állapota',
       issued: 'Kiadva',
       sourceOffice: 'Kiadó központ',
       messageNumber: 'Üzenet',

@@ -55,6 +55,31 @@ function ProductSection({ label, value }: { label: string; value: string | null 
   );
 }
 
+function hasActiveTsunamiThreat(product: TsunamiProduct | null, hasActiveAlerts: boolean): boolean {
+  const statusText = `${product?.threatForecast ?? ''} ${product?.evaluation ?? ''}`.toLocaleLowerCase();
+
+  if (
+    statusText.includes('no longer') ||
+    statusText.includes('has now passed') ||
+    statusText.includes('no tsunami threat') ||
+    statusText.includes('no threat') ||
+    statusText.includes('not expected')
+  ) {
+    return false;
+  }
+
+  if (
+    statusText.includes('tsunami threat') ||
+    statusText.includes('hazardous tsunami') ||
+    statusText.includes('dangerous tsunami') ||
+    statusText.includes('tsunami waves')
+  ) {
+    return true;
+  }
+
+  return hasActiveAlerts;
+}
+
 export function TsunamiStatus({
   quakes,
   alerts,
@@ -74,6 +99,8 @@ export function TsunamiStatus({
   const referencedEarthquake = latestProduct?.earthquake ?? null;
   const referencedQuake = latestProduct?.referencedQuake ?? null;
   const flaggedCountLabel = formatNumber(flaggedQuakes.length, copy.locale);
+  const threatText = latestProduct?.threatForecast ?? latestProduct?.evaluation ?? copy.tsunami.productEmptyBody;
+  const hasThreat = hasActiveTsunamiThreat(latestProduct, hasActiveAlerts);
 
   if (isLoading || (status === 'loading' && products.length === 0)) {
     return (
@@ -132,9 +159,22 @@ export function TsunamiStatus({
               </button>
             </div>
           )}
-          <p className="mt-2 max-w-4xl text-sm leading-6 text-slate-400">
-            {latestProduct?.threatForecast ?? latestProduct?.evaluation ?? copy.tsunami.productEmptyBody}
-          </p>
+          <div
+            className={`mt-3 max-w-4xl rounded-[8px] border px-3 py-3 ${
+              hasThreat
+                ? 'border-signal-red/35 bg-signal-red/10'
+                : 'border-signal-green/30 bg-signal-green/10'
+            }`}
+          >
+            <p
+              className={`text-xs font-semibold uppercase tracking-wide ${
+                hasThreat ? 'text-signal-red' : 'text-signal-green'
+              }`}
+            >
+              {copy.tsunami.threatStatus}
+            </p>
+            <p className="mt-1 text-sm font-semibold leading-6 text-white">{threatText}</p>
+          </div>
           <p className="mt-2 max-w-4xl text-xs leading-5 text-slate-500">{copy.tsunami.disclaimer}</p>
         </div>
 
@@ -160,8 +200,7 @@ export function TsunamiStatus({
         <div className="mt-4 rounded-[8px] border border-white/10 bg-ink-900/55 p-3">
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.tsunami.headline}</p>
-              <p className="mt-1 text-sm font-semibold leading-5 text-white">{latestProduct.headline}</p>
+              <p className="text-sm font-semibold leading-5 text-white">{copy.tsunami.headline}</p>
               <p className="mt-1 text-xs text-slate-500">
                 {formatDateTime(Date.parse(latestProduct.issuanceTime), copy.locale)} · {latestProduct.issuingOffice} ·{' '}
                 {latestProduct.messageNumber ?? latestProduct.wmoCollectiveId}
