@@ -33,8 +33,7 @@ export default {
       },
       fontFamily: {
         display: [
-          'Inter Tight',
-          'Inter',
+          'Source Sans 3',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
@@ -43,7 +42,7 @@ export default {
           'sans-serif',
         ],
         sans: [
-          'Inter',
+          'Source Sans 3',
           'ui-sans-serif',
           'system-ui',
           '-apple-system',
