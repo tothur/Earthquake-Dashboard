@@ -104,7 +104,7 @@ export function TsunamiStatus({
 
   if (isLoading || (status === 'loading' && products.length === 0)) {
     return (
-      <section className="rounded-[8px] border border-white/10 bg-white/[0.045] p-4 shadow-panel">
+      <section className="surface-refined rounded-[8px] border border-white/10 bg-white/[0.045] p-4 shadow-panel">
         <div className="h-4 w-56 animate-pulse rounded bg-white/10" />
         <div className="mt-4 h-4 w-3/4 animate-pulse rounded bg-white/10" />
         <div className="mt-2 h-4 w-1/2 animate-pulse rounded bg-white/10" />
@@ -114,7 +114,7 @@ export function TsunamiStatus({
 
   return (
     <section
-      className={`rounded-[8px] border p-4 shadow-panel ${
+      className={`surface-refined rounded-[8px] border p-4 shadow-panel ${
         hasActiveAlerts ? 'border-signal-orange/30 bg-signal-orange/10' : 'border-white/10 bg-white/[0.045]'
       }`}
       role="status"
@@ -165,7 +165,7 @@ export function TsunamiStatus({
           title={referencedQuake ? copy.tsunami.openReferencedEarthquake : copy.tsunami.referencedUnavailable}
         >
           <span className="flex min-w-0 items-center gap-3">
-            <span className="inline-flex h-12 min-w-12 shrink-0 items-center justify-center rounded-[8px] bg-signal-orange/20 px-2 text-lg font-semibold text-signal-orange">
+            <span className="font-numeric inline-flex h-12 min-w-12 shrink-0 items-center justify-center rounded-[8px] bg-signal-orange/20 px-2 text-lg font-semibold text-signal-orange">
               {formatMagnitude(referencedEarthquake.magnitude, copy.locale, copy.pendingMagnitude)}
             </span>
             <span className="min-w-0">
@@ -197,7 +197,7 @@ export function TsunamiStatus({
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <p className="text-sm font-semibold leading-5 text-white">{copy.tsunami.headline}</p>
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="font-numeric mt-1 text-xs text-slate-500">
                 {formatDateTime(Date.parse(latestProduct.issuanceTime), copy.locale)} · {latestProduct.issuingOffice} ·{' '}
                 {latestProduct.messageNumber ?? latestProduct.wmoCollectiveId}
               </p>

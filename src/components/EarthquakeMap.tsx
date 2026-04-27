@@ -484,7 +484,7 @@ export function EarthquakeMap({
       : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
 
   return (
-    <section className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
+    <section className="surface-refined overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className="flex flex-col gap-3 border-b border-white/10 px-4 py-3 xl:flex-row xl:items-center xl:justify-between">
         <div>
           <h2 className="text-lg font-semibold text-white">{copy.map.title}</h2>
@@ -576,7 +576,7 @@ export function EarthquakeMap({
               ['M6+', 'bg-signal-red'],
               ['M7+', 'bg-signal-violet'],
             ].map(([label, color]) => (
-              <span key={label} className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-ink-900/80 px-2 py-1">
+              <span key={label} className="font-numeric inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-ink-900/80 px-2 py-1">
                 <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
                 {label}
               </span>

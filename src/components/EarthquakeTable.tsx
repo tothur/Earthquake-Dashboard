@@ -34,7 +34,7 @@ export function EarthquakeTable({
   ];
 
   return (
-    <section className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
+    <section className="surface-refined overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className={clsx('px-4 py-3', isOpen && 'border-b border-white/10')}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -50,7 +50,7 @@ export function EarthquakeTable({
           >
             {isOpen ? <ChevronDown size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
             {isOpen ? copy.table.hide : copy.table.show}
-            <span className="rounded bg-white/10 px-2 py-0.5 text-xs text-slate-300">
+            <span className="font-numeric rounded bg-white/10 px-2 py-0.5 text-xs text-slate-300">
               {formatNumber(quakes.length, copy.locale)}
             </span>
           </button>
@@ -138,17 +138,17 @@ export function EarthquakeTable({
                         >
                           <td className="px-4 py-4 align-top">
                             <div className="font-medium text-white">{formatRelativeTime(quake.time, copy.locale)}</div>
-                            <div className="mt-1 text-sm text-slate-400">{formatDateTime(quake.time, copy.locale)}</div>
+                            <div className="font-numeric mt-1 text-sm text-slate-400">{formatDateTime(quake.time, copy.locale)}</div>
                           </td>
                           <td className="px-4 py-4 text-right align-top">
                             <span
-                              className="inline-flex min-w-16 justify-center rounded-[8px] px-2.5 py-1 text-sm font-semibold"
+                              className="font-numeric inline-flex min-w-16 justify-center rounded-[8px] px-2.5 py-1 text-sm font-semibold"
                               style={{ color: tone.color, backgroundColor: tone.background }}
                             >
                               {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
                             </span>
                           </td>
-                          <td className="px-4 py-4 text-right align-top text-slate-200">{formatDepth(quake.depthKm, copy.locale)}</td>
+                          <td className="font-numeric px-4 py-4 text-right align-top text-slate-200">{formatDepth(quake.depthKm, copy.locale)}</td>
                           <td className="px-4 py-4 align-top">
                             <div className="max-w-[390px] font-medium text-white">{quake.place}</div>
                             <div className="mt-1 flex flex-wrap gap-2 text-xs text-slate-400">

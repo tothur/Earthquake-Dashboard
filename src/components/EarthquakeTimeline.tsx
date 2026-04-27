@@ -83,7 +83,7 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
   const markerIndexes = [0, Math.floor((buckets.length - 1) / 2), buckets.length - 1];
 
   return (
-    <section className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
+    <section className="surface-refined overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className="flex flex-col gap-3 border-b border-white/10 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -99,7 +99,7 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
               <Clock3 size={14} aria-hidden="true" />
               {copy.timeline.peak}
             </div>
-            <p className="mt-1 font-semibold text-white">
+            <p className="font-numeric mt-1 font-semibold text-white">
               {hasActivity && peakBucket
                 ? copy.timeline.eventCount(formatNumber(peakBucket.count, copy.locale))
                 : copy.notAvailable}
@@ -110,7 +110,7 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
               <SignalHigh size={14} aria-hidden="true" />
               {copy.timeline.strongest}
             </div>
-            <p className="mt-1 font-semibold text-white">
+            <p className="font-numeric mt-1 font-semibold text-white">
               {strongest ? formatMagnitude(strongest.magnitude, copy.locale, copy.pendingMagnitude) : copy.notAvailable}
             </p>
           </div>
@@ -137,7 +137,7 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
                 return (
                   <div key={bucket.start} className="flex min-w-0 flex-1 items-end">
                     <div
-                      className="w-full rounded-t-[6px] border border-white/10 transition hover:brightness-125"
+                      className="w-full rounded-t-[6px] border border-white/10 shadow-sm transition hover:brightness-125"
                       style={{
                         height,
                         backgroundColor: bucket.count === 0 ? 'rgba(148, 163, 184, 0.18)' : tone.color,
@@ -151,7 +151,7 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
               })}
             </div>
 
-            <div className="relative mt-2 h-5 text-xs text-slate-500">
+            <div className="font-numeric relative mt-2 h-5 text-xs text-slate-500">
               {markerIndexes.map((index) => (
                 <span
                   key={index}

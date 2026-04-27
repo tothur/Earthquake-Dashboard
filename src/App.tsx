@@ -302,19 +302,21 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-ink-950 text-slate-100">
+    <div className="min-h-screen bg-transparent text-slate-100">
       <div className="mx-auto flex w-full max-w-[1480px] flex-col gap-5 px-4 py-5 sm:px-6 lg:px-8">
         <header className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="max-w-4xl">
-            <div className="inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.05] px-3 py-1 text-sm font-semibold text-signal-green">
+            <div className="surface-refined inline-flex items-center gap-2 rounded-[8px] border border-white/10 bg-white/[0.05] px-3 py-1 text-sm font-semibold text-signal-green shadow-panel">
               <Globe2 size={16} aria-hidden="true" />
               {copy.appBadge}
             </div>
-            <h1 className="mt-4 text-3xl font-semibold text-white sm:text-4xl lg:text-5xl">{copy.title}</h1>
+            <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[0.98] text-white sm:text-5xl lg:text-6xl">
+              {copy.title}
+            </h1>
           </div>
 
           <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 lg:flex lg:w-fit lg:flex-col lg:items-end">
-            <div className="flex min-w-0 items-center justify-between gap-2 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel sm:justify-start lg:w-fit">
+            <div className="surface-refined flex min-w-0 items-center justify-between gap-2 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel sm:justify-start lg:w-fit">
               <span className="flex min-w-0 items-center gap-2 whitespace-nowrap px-2 font-medium text-slate-400">
                 <Languages size={16} aria-hidden="true" />
                 {copy.language}
@@ -340,7 +342,7 @@ function App() {
               })}
             </div>
 
-            <div className="flex min-w-0 items-center justify-between gap-1 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel sm:justify-start lg:w-fit">
+            <div className="surface-refined flex min-w-0 items-center justify-between gap-1 rounded-[8px] border border-white/10 bg-white/[0.045] p-1 text-sm shadow-panel sm:justify-start lg:w-fit">
               <span className="flex min-w-0 items-center gap-2 whitespace-nowrap px-2 font-medium text-slate-400">
                 <Monitor size={16} aria-hidden="true" />
                 {copy.theme.label}

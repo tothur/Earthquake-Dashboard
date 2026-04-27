@@ -28,7 +28,7 @@ export function FilterBar({
   onRefresh,
 }: FilterBarProps) {
   return (
-    <section className="rounded-[8px] border border-white/10 bg-white/[0.04] p-2 shadow-panel">
+    <section className="surface-refined rounded-[8px] border border-white/10 bg-white/[0.04] p-2 shadow-panel">
       <div className="grid gap-2 lg:grid-cols-[auto_minmax(0,1fr)] lg:items-center">
         <div
           className="grid grid-cols-3 gap-1 rounded-[8px] border border-white/10 bg-ink-900/80 p-1"
@@ -43,7 +43,7 @@ export function FilterBar({
                 type="button"
                 onClick={() => onFeedChange(feed.id)}
                 className={clsx(
-                  'inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-[7px] px-2 text-xs font-medium transition sm:min-w-20',
+                  'inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-[7px] px-2 text-xs font-semibold transition sm:min-w-20',
                   isSelected
                     ? 'bg-signal-green/15 text-signal-green'
                     : 'text-slate-300 hover:bg-white/[0.07] hover:text-white',
@@ -64,7 +64,7 @@ export function FilterBar({
             <select
               value={minimumMagnitude}
               onChange={(event) => onMinimumMagnitudeChange(Number(event.target.value))}
-              className="min-w-0 bg-transparent font-semibold text-white outline-none"
+              className="font-numeric min-w-0 bg-transparent font-semibold text-white outline-none"
               aria-label={copy.filter.minimumMagnitudeAria}
             >
               {MIN_MAGNITUDE_OPTIONS.map((option) => (
@@ -81,7 +81,7 @@ export function FilterBar({
             <select
               value={majorMagnitudeThreshold}
               onChange={(event) => onMajorMagnitudeThresholdChange(Number(event.target.value))}
-              className="min-w-0 bg-transparent font-semibold text-white outline-none"
+              className="font-numeric min-w-0 bg-transparent font-semibold text-white outline-none"
               aria-label={copy.filter.watchThresholdAria}
             >
               {MAJOR_MAGNITUDE_OPTIONS.map((option) => (

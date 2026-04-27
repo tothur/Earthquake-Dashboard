@@ -57,7 +57,7 @@ export function MagnitudeDistribution({ quakes, copy, isLoading }: MagnitudeDist
   }, null);
 
   return (
-    <section className="overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
+    <section className="surface-refined overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className="border-b border-white/10 px-4 py-3">
         <div className="flex items-center gap-2">
           <BarChart3 size={18} className="text-signal-green" aria-hidden="true" />
@@ -73,7 +73,7 @@ export function MagnitudeDistribution({ quakes, copy, isLoading }: MagnitudeDist
               <SignalHigh size={14} aria-hidden="true" />
               {copy.distribution.total}
             </div>
-            <p className="mt-1 font-semibold text-white">{formatNumber(totalWithMagnitude, copy.locale)}</p>
+            <p className="font-numeric mt-1 font-semibold text-white">{formatNumber(totalWithMagnitude, copy.locale)}</p>
           </div>
           <div className="rounded-[8px] border border-white/10 bg-ink-900/70 px-3 py-2">
             <div className="font-semibold text-slate-400">{copy.distribution.strongestBin}</div>
@@ -95,7 +95,7 @@ export function MagnitudeDistribution({ quakes, copy, isLoading }: MagnitudeDist
               <div key={bin.id}>
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="font-medium text-slate-300">{copy.distribution.bins[bin.id]}</span>
-                  <span className="font-semibold text-white">{countLabel}</span>
+                  <span className="font-numeric font-semibold text-white">{countLabel}</span>
                 </div>
                 <div className="mt-1 h-3 overflow-hidden rounded-full border border-white/10 bg-ink-900/80">
                   <div
@@ -113,7 +113,7 @@ export function MagnitudeDistribution({ quakes, copy, isLoading }: MagnitudeDist
         {pendingCount > 0 && (
           <div className="mt-4 rounded-[8px] border border-white/10 bg-ink-900/70 px-3 py-2 text-sm text-slate-400">
             {copy.distribution.pending}:{' '}
-            <span className="font-semibold text-white">{formatNumber(pendingCount, copy.locale)}</span>
+            <span className="font-numeric font-semibold text-white">{formatNumber(pendingCount, copy.locale)}</span>
           </div>
         )}
 

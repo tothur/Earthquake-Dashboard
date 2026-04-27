@@ -23,8 +23,8 @@ export function StatCard({ label, value, detail, icon: Icon, tone = 'green', onC
     <>
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-sm font-medium text-slate-400">{label}</p>
-          <p className="mt-2 text-2xl font-semibold text-white">{value}</p>
+          <p className="text-sm font-semibold text-slate-400">{label}</p>
+          <p className="mt-2 font-numeric text-2xl font-semibold text-white">{value}</p>
         </div>
         <span className={`inline-flex h-10 w-10 items-center justify-center rounded-[8px] ${toneClasses[tone]}`}>
           <Icon size={19} aria-hidden="true" />
@@ -39,7 +39,7 @@ export function StatCard({ label, value, detail, icon: Icon, tone = 'green', onC
       <button
         type="button"
         onClick={onClick}
-        className="rounded-[8px] border border-white/10 bg-white/[0.045] p-4 text-left shadow-panel transition hover:border-signal-orange/40 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-orange/70"
+        className="surface-refined rounded-[8px] border border-white/10 bg-white/[0.045] p-4 text-left shadow-panel transition hover:-translate-y-0.5 hover:border-signal-orange/40 hover:bg-white/[0.07] focus:outline-none focus-visible:ring-2 focus-visible:ring-signal-orange/70"
         aria-label={actionLabel ?? label}
         title={actionLabel ?? label}
       >
@@ -49,7 +49,7 @@ export function StatCard({ label, value, detail, icon: Icon, tone = 'green', onC
   }
 
   return (
-    <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-4 shadow-panel">
+    <article className="surface-refined rounded-[8px] border border-white/10 bg-white/[0.045] p-4 shadow-panel">
       {content}
     </article>
   );

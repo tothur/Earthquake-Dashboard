@@ -23,7 +23,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-white/10 py-3 last:border-b-0">
       <dt className="text-sm text-slate-400">{label}</dt>
-      <dd className="text-right text-sm font-semibold text-slate-100">{value}</dd>
+      <dd className="font-numeric text-right text-sm font-semibold text-slate-100">{value}</dd>
     </div>
   );
 }
@@ -74,7 +74,7 @@ export function EventDetailPanel({ quake, copy, onClose }: EventDetailPanelProps
         <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
           <section>
             <div
-              className="inline-flex rounded-[8px] px-3 py-1 text-sm font-semibold"
+              className="font-numeric inline-flex rounded-[8px] px-3 py-1 text-sm font-semibold"
               style={{ color: tone.color, backgroundColor: tone.background }}
             >
               {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
@@ -87,20 +87,20 @@ export function EventDetailPanel({ quake, copy, onClose }: EventDetailPanelProps
             <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-3">
               <SignalHigh size={17} className="text-signal-amber" aria-hidden="true" />
               <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.detail.magnitude}</p>
-              <p className="mt-1 text-lg font-semibold text-white">
+              <p className="font-numeric mt-1 text-lg font-semibold text-white">
                 {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
               </p>
             </article>
             <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-3">
               <Ruler size={17} className="text-signal-green" aria-hidden="true" />
               <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.detail.depth}</p>
-              <p className="mt-1 text-lg font-semibold text-white">{formatDepth(quake.depthKm, copy.locale)}</p>
+              <p className="font-numeric mt-1 text-lg font-semibold text-white">{formatDepth(quake.depthKm, copy.locale)}</p>
             </article>
             <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-3">
               <MapPin size={17} className="text-signal-violet" aria-hidden="true" />
               <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-500">{copy.detail.coordinates}</p>
-              <p className="mt-1 text-sm font-semibold text-white">{latitude}</p>
-              <p className="text-sm font-semibold text-white">{longitude}</p>
+              <p className="font-numeric mt-1 text-sm font-semibold text-white">{latitude}</p>
+              <p className="font-numeric text-sm font-semibold text-white">{longitude}</p>
             </article>
             <article className="rounded-[8px] border border-white/10 bg-white/[0.045] p-3">
               <Waves size={17} className="text-signal-orange" aria-hidden="true" />

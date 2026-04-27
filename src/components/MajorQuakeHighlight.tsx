@@ -27,7 +27,7 @@ export function MajorQuakeHighlight({
 
   if (isLoading) {
     return (
-      <section className="rounded-[8px] border border-white/10 bg-white/[0.045] p-5 shadow-panel">
+      <section className="surface-refined rounded-[8px] border border-white/10 bg-white/[0.045] p-5 shadow-panel">
         <div className="h-4 w-44 animate-pulse rounded bg-white/10" />
         <div className="mt-5 grid gap-4 md:grid-cols-[160px_minmax(0,1fr)]">
           <div className="h-28 animate-pulse rounded-[8px] bg-white/10" />
@@ -43,7 +43,7 @@ export function MajorQuakeHighlight({
 
   if (!quake) {
     return (
-      <section className="rounded-[8px] border border-white/10 bg-white/[0.045] p-5 shadow-panel">
+      <section className="surface-refined rounded-[8px] border border-white/10 bg-white/[0.045] p-5 shadow-panel">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="inline-flex items-center gap-2 rounded-[8px] border border-signal-green/25 bg-signal-green/10 px-3 py-1 text-sm font-semibold text-signal-green">
@@ -66,16 +66,16 @@ export function MajorQuakeHighlight({
   const toneLabel = copy.magnitudeTone[tone.label as MagnitudeToneKey];
 
   return (
-    <section className="rounded-[8px] border border-signal-amber/25 bg-[linear-gradient(135deg,rgba(246,182,95,0.16),rgba(184,108,255,0.10),rgba(255,255,255,0.045))] p-5 shadow-glow">
+    <section className="surface-refined rounded-[8px] border border-signal-amber/25 bg-[linear-gradient(135deg,rgba(246,182,95,0.18),rgba(84,214,167,0.08),rgba(184,108,255,0.10),rgba(255,255,255,0.045))] p-5 shadow-glow">
       <div className="flex items-center gap-2 text-sm font-semibold text-signal-amber">
         <AlertTriangle size={17} aria-hidden="true" />
         {copy.major.largest(thresholdLabel, feedLabel)}
       </div>
 
       <div className="mt-5 grid gap-5 md:grid-cols-[170px_minmax(0,1fr)] md:items-center">
-        <div className="rounded-[8px] border border-white/10 bg-ink-950/70 p-4 text-center">
+        <div className="rounded-[8px] border border-white/10 bg-ink-950/70 p-4 text-center shadow-panel">
           <p className="text-sm font-medium text-slate-400">{toneLabel}</p>
-          <p className="mt-2 text-5xl font-semibold text-white">
+          <p className="mt-2 font-numeric text-5xl font-semibold text-white">
             {formatMagnitude(quake.magnitude, copy.locale, copy.pendingMagnitude)}
           </p>
           <p className="mt-2 text-sm text-slate-400">{quake.magnitudeType ?? copy.major.magnitudeSource}</p>
