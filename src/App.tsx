@@ -310,7 +310,7 @@ function App() {
               <Globe2 size={16} aria-hidden="true" />
               {copy.appBadge}
             </div>
-            <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[1.02] text-white sm:text-5xl lg:text-6xl">
+            <h1 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[0.98] text-white sm:text-5xl lg:text-6xl">
               {copy.title}
             </h1>
           </div>
