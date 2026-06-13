@@ -83,7 +83,7 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
   const markerIndexes = [0, Math.floor((buckets.length - 1) / 2), buckets.length - 1];
 
   return (
-    <section className="surface-refined overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
+    <section className="surface-refined flex h-full flex-col overflow-hidden rounded-[8px] border border-white/10 bg-white/[0.045] shadow-panel">
       <div className="flex flex-col gap-3 border-b border-white/10 px-4 py-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <div className="flex items-center gap-2">
@@ -117,13 +117,13 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
         </div>
       </div>
 
-      <div className="px-4 py-4">
-        <div className="overflow-x-auto">
-          <div className="min-w-[680px]">
-            <div className="flex h-36 items-end gap-1 border-b border-white/10 pb-2">
+      <div className="flex min-h-[320px] flex-1 flex-col px-4 py-4">
+        <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
+          <div className="flex min-w-[680px] flex-1 flex-col">
+            <div className="flex min-h-[240px] flex-1 items-end gap-1 border-b border-white/10 pb-2">
               {buckets.map((bucket) => {
                 const tone = magnitudeTone(bucket.maxMagnitude);
-                const height = bucket.count === 0 || maxCount === 0 ? 8 : Math.max(10, (bucket.count / maxCount) * 118);
+                const height = bucket.count === 0 || maxCount === 0 ? '10px' : `${Math.max(8, (bucket.count / maxCount) * 100)}%`;
                 const startLabel = formatTimelineTime(bucket.start, feedId, copy.locale);
                 const endLabel = formatTimelineTime(bucket.end, feedId, copy.locale);
                 const title = `${copy.timeline.interval(startLabel, endLabel)}: ${copy.timeline.eventCount(
