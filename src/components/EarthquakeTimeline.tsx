@@ -117,13 +117,13 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
         </div>
       </div>
 
-      <div className="flex min-h-[320px] flex-1 flex-col px-4 py-4">
-        <div className="flex min-h-0 flex-1 flex-col overflow-x-auto">
-          <div className="flex min-w-[680px] flex-1 flex-col">
-            <div className="flex min-h-[240px] flex-1 items-end gap-1 border-b border-white/10 pb-2">
+      <div className="flex flex-1 flex-col px-4 py-4">
+        <div className="overflow-x-auto">
+          <div className="min-w-[680px]">
+            <div className="flex h-[360px] items-end gap-1 border-b border-white/10 pb-2 sm:h-[420px] xl:h-[460px]">
               {buckets.map((bucket) => {
                 const tone = magnitudeTone(bucket.maxMagnitude);
-                const height = bucket.count === 0 || maxCount === 0 ? '10px' : `${Math.max(8, (bucket.count / maxCount) * 100)}%`;
+                const height = bucket.count === 0 || maxCount === 0 ? '10px' : `${Math.max(3, (bucket.count / maxCount) * 100)}%`;
                 const startLabel = formatTimelineTime(bucket.start, feedId, copy.locale);
                 const endLabel = formatTimelineTime(bucket.end, feedId, copy.locale);
                 const title = `${copy.timeline.interval(startLabel, endLabel)}: ${copy.timeline.eventCount(
