@@ -33,6 +33,7 @@ export function FilterBar({
         <div
           className="grid grid-cols-3 gap-1 rounded-[8px] border border-white/10 bg-ink-900/80 p-1"
           aria-label={copy.filter.timeRange}
+          role="group"
         >
           {FEEDS.map((feed) => {
             const isSelected = feed.id === selectedFeedId;
@@ -42,6 +43,7 @@ export function FilterBar({
                 key={feed.id}
                 type="button"
                 onClick={() => onFeedChange(feed.id)}
+                aria-pressed={isSelected}
                 className={clsx(
                   'inline-flex h-8 min-w-0 items-center justify-center gap-1.5 rounded-[7px] px-2 text-xs font-semibold transition sm:min-w-20',
                   isSelected

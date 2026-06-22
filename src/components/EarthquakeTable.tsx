@@ -1,9 +1,12 @@
+import { useEffect, useState } from 'react';
 import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, ExternalLink, PanelRightOpen } from 'lucide-react';
 import clsx from 'clsx';
 import type { Earthquake, SortKey, SortState } from '../types';
 import { formatDateTime, formatDepth, formatMagnitude, formatNumber, formatRelativeTime } from '../utils/format';
 import { magnitudeTone } from '../utils/earthquakes';
 import type { DashboardCopy } from '../i18n';
+
+const PAGE_SIZE = 25;
 
 interface EarthquakeTableProps {
   quakes: Earthquake[];
@@ -26,6 +29,14 @@ export function EarthquakeTable({
   onSortChange,
   onQuakeSelect,
 }: EarthquakeTableProps) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const visibleQuakes = quakes.slice(0, visibleCount);
+  const hasMore = visibleQuakes.length < quakes.length;
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [quakes]);
+
   const columns: Array<{ key: SortKey; label: string; align?: 'right' | 'left' }> = [
     { key: 'time', label: copy.table.columns.time },
     { key: 'magnitude', label: copy.table.columns.magnitude, align: 'right' },
@@ -128,7 +139,7 @@ export function EarthquakeTable({
                         </td>
                       </tr>
                     ))
-                  : quakes.map((quake) => {
+                  : visibleQuakes.map((quake) => {
                       const tone = magnitudeTone(quake.magnitude);
                       return (
                         <tr
@@ -193,6 +204,26 @@ export function EarthquakeTable({
             <div className="border-t border-white/10 px-4 py-10 text-center">
               <p className="font-semibold text-white">{copy.table.emptyTitle}</p>
               <p className="mt-2 text-sm text-slate-400">{copy.table.emptyBody}</p>
+            </div>
+          )}
+
+          {!isLoading && quakes.length > 0 && (
+            <div className="flex flex-col items-center gap-3 border-t border-white/10 px-4 py-4 sm:flex-row sm:justify-between">
+              <p className="text-sm text-slate-400" aria-live="polite">
+                {copy.table.showing(
+                  formatNumber(visibleQuakes.length, copy.locale),
+                  formatNumber(quakes.length, copy.locale),
+                )}
+              </p>
+              {hasMore && (
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((count) => Math.min(count + PAGE_SIZE, quakes.length))}
+                  className="inline-flex h-10 items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.06] px-4 text-sm font-semibold text-white transition hover:border-white/20 hover:bg-white/[0.1]"
+                >
+                  {copy.table.loadMore}
+                </button>
+              )}
             </div>
           )}
         </div>

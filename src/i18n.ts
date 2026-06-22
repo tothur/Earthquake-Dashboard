@@ -160,6 +160,8 @@ export interface DashboardCopy {
     show: string;
     hide: string;
     collapsed: (count: string) => string;
+    showing: (visible: string, total: string) => string;
+    loadMore: string;
     columns: Record<'time' | 'magnitude' | 'depthKm' | 'place' | 'link', string>;
     status: string;
     feltReports: string;
@@ -386,6 +388,8 @@ export const COPY: Record<Language, DashboardCopy> = {
       hide: 'Hide list',
       collapsed: (count: string) =>
         `${count} events available. Expand the list to inspect, sort, and open individual USGS event records.`,
+      showing: (visible: string, total: string) => `Showing ${visible} of ${total} events`,
+      loadMore: 'Load 25 more',
       columns: {
         time: 'Time',
         magnitude: 'Magnitude',
@@ -624,6 +628,8 @@ export const COPY: Record<Language, DashboardCopy> = {
       hide: 'Lista elrejtése',
       collapsed: (count: string) =>
         `${count} esemény érhető el. Nyisd meg a listát az események vizsgálatához, rendezéséhez és az USGS-rekordok megnyitásához.`,
+      showing: (visible: string, total: string) => `${visible} / ${total} esemény látható`,
+      loadMore: 'További 25 betöltése',
       columns: {
         time: 'Idő',
         magnitude: 'Magnitúdó',

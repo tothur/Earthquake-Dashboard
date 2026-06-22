@@ -118,9 +118,9 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
       </div>
 
       <div className="flex flex-1 flex-col px-4 py-4">
-        <div className="overflow-x-auto">
-          <div className="min-w-[680px]">
-            <div className="flex h-[360px] items-end gap-1 border-b border-white/10 pb-2 sm:h-[420px] xl:h-[460px]">
+        <div className="min-w-0">
+          <div>
+            <div className="flex h-[240px] items-end gap-1 border-b border-white/10 pb-2 sm:h-[300px] xl:h-[340px]">
               {buckets.map((bucket) => {
                 const tone = magnitudeTone(bucket.maxMagnitude);
                 const height = bucket.count === 0 || maxCount === 0 ? '10px' : `${Math.max(3, (bucket.count / maxCount) * 100)}%`;
@@ -135,9 +135,9 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
                 }`;
 
                 return (
-                  <div key={bucket.start} className="flex min-w-0 flex-1 items-end">
+                  <div key={bucket.start} className="flex h-full min-w-0 flex-1 items-end">
                     <div
-                      className="w-full rounded-t-[6px] border border-white/10 shadow-sm transition hover:brightness-125"
+                      className="w-full rounded-t-[6px] border border-white/10 shadow-sm transition hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-signal-green"
                       style={{
                         height,
                         backgroundColor: bucket.count === 0 ? 'rgba(148, 163, 184, 0.18)' : tone.color,
@@ -145,6 +145,8 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
                       }}
                       title={title}
                       aria-label={title}
+                      role="img"
+                      tabIndex={0}
                     />
                   </div>
                 );
@@ -155,7 +157,9 @@ export function EarthquakeTimeline({ quakes, feedId, copy, isLoading }: Earthqua
               {markerIndexes.map((index) => (
                 <span
                   key={index}
-                  className="absolute top-0 -translate-x-1/2 whitespace-nowrap"
+                  className={`absolute top-0 whitespace-nowrap ${
+                    index === 0 ? '' : index === buckets.length - 1 ? '-translate-x-full' : '-translate-x-1/2'
+                  }`}
                   style={{ left: `${(index / (buckets.length - 1)) * 100}%` }}
                 >
                   {formatTimelineTime(buckets[index].start, feedId, copy.locale)}
